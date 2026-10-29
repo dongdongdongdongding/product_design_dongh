@@ -1,0 +1,133 @@
+/* 화면 시안 테마 — 배포 사이트에서 잰 값으로 바꾼다(색 · 글꼴 · 사이드바 · 카드 · 버튼 · 입력 · 배지 · 지도 오버레이).
+   클래스 이름(.scr .sb .nv .tp .ct .ph .c .ch .btn .inp .sel .lab .seg .tg .note .t .mapw …)은 엔진 · 검수가 쓰므로 유지한다. */
+.scr { width: 1440px; height: 900px; position: relative; background: #F9FAFB; color: #000000; font: 14px/1.5 "Overpass", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: 60px minmax(0, 1fr) 40px; overflow: hidden; text-align: left }
+.scr * { box-sizing: border-box }
+.scr .sb { grid-row: 1 / 4; background: #FFFFFF; box-shadow: 0 8px 10px 0 rgba(183, 192, 206, .2); z-index: 1; display: flex; flex-direction: column }
+.scr .sbh { height: 60px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F2F4F9 }
+.scr .logo { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 300; color: #2E9E6B; white-space: nowrap }
+.scr .logo i { width: 20px; height: 20px; border-radius: 5px; background: #1F6F4C }
+.scr .logo b { font-weight: 800; color: #1F6F4C }
+.scr .burger { width: 24px; display: grid; gap: 4px } .scr .burger i { height: 1.5px; background: #383838 }
+.scr .nav { padding: 20px 0 0; display: grid; gap: 0 }
+.scr .nv { position: relative; height: 32px; padding: 0 25px; display: flex; align-items: center; gap: 14px; color: #000000; white-space: nowrap }
+.scr .nv svg { width: 14px; height: 14px; flex: none; color: #000000 }
+.scr .nv.on { color: #2E9E6B } .scr .nv.on svg { color: #2E9E6B }
+.scr .nv.on::before { content: ""; position: absolute; left: 0; top: 3px; width: 3px; height: 26px; background: #2E9E6B }
+.scr .nv small { font-size: 10.5px; font-weight: 700; line-height: 1; padding: 5px 5px 3px; border-radius: 3px; background: #FFF4D9; color: #A06A00 }
+.scr .nv .chev { margin-left: auto; width: 7px; height: 7px; border-right: 1.5px solid #000; border-bottom: 1.5px solid #000; transform: rotate(45deg) translateY(-2px) }
+.scr .tp { display: flex; align-items: center; justify-content: flex-end; gap: 14px; padding: 0 25px; background: #FFFFFF; border-bottom: 1px solid #F2F4F9; box-shadow: 3px 0 10px 0 rgba(183, 192, 206, .2) }
+.scr .user { display: flex; align-items: center; gap: 14px; color: #535353; font-weight: 700; white-space: nowrap }
+.scr .user i { width: 30px; height: 30px; border-radius: 50%; background: #D6D9DE; box-shadow: inset 0 -8px 0 0 #C4C8CF }
+.scr .ftr { grid-column: 2; display: flex; align-items: center; padding: 0 25px; border-top: 1px solid #F2F4F9; font-size: 12px; color: #686868; background: #F9FAFB }
+.scr .ct { padding: 18px 25px 18px; display: flex; flex-direction: column; gap: 16px; min-height: 0; overflow: hidden }
+/* 브레드크럼 행: 사이트에는 페이지 제목이 없고 “홈 > 메뉴명”만 있다 */
+.scr .ph { display: flex; align-items: center; gap: 12px; min-height: 26px }
+.scr .crumb { font-size: 13px; color: #000000; white-space: nowrap } .scr .crumb a, .scr .crumb .h { color: #007BFF } .scr .crumb s { text-decoration: none; color: #6C757D; margin: 0 8px }
+.scr .ph .acts { margin-left: auto; display: flex; gap: 10px; align-items: center }
+.scr .c { background: #FFFFFF; border: 1px solid #F2F4F9; border-radius: 4px; box-shadow: 0 0 10px 0 rgba(183, 192, 206, .2); padding: 20px; min-width: 0 }
+.scr .ch { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; line-height: 1.2; margin-bottom: 14px; color: #000000 }
+.scr .ch .n { display: none }
+.scr .ch .r { margin-left: auto; display: flex; gap: 6px; align-items: center; font-weight: 400 }
+.scr .cnt { font-size: 12px; color: #8A929E; font-weight: 400 }
+.scr .btn { height: 31px; padding: 0 12px; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-weight: 600; font-size: 12.8px; border: 1px solid #2E9E6B; background: #FFFFFF; color: #2E9E6B; white-space: nowrap }
+.scr .btn svg { width: 13px; height: 13px }
+.scr .btn.pri { background: #2E9E6B; color: #FFFFFF }
+.scr .btn.sec { background: #7987A1; border-color: #7987A1; color: #FFFFFF }
+.scr .btn.ghost { border-color: transparent; padding: 0 4px }
+.scr .btn.sm { height: 26px; padding: 0 9px; font-size: 12px }
+.scr .btn.lg { height: 38px; font-size: 14px }
+.scr .btn.dis { opacity: .5 }
+.scr .btn.danger { color: #FF3366; border-color: #FF3366 }
+.scr .inp { height: 31px; border: 1px solid #E8EBF1; border-radius: 3.2px; padding: 0 12px; display: flex; align-items: center; background: #FFFFFF; color: #495057; font-size: 13px; white-space: nowrap; overflow: hidden }
+.scr .inp.ro { background: #F4F6F9 }
+.scr .inp.err { border-color: #FF3366 }
+.scr .inp .u { margin-left: auto; color: #8A929E; font-size: 12px; padding-left: 10px }
+.scr .inp.ph-t, .scr .ph-t { color: #B4BAC4 }
+.scr .sel { height: 30px; padding: 0 12px; border: 1px solid #E8EBF1; border-radius: 3.2px; display: flex; align-items: center; gap: 8px; background: #FFFFFF; color: #495057; font-size: 13px; white-space: nowrap }
+.scr .sel::after { content: ""; width: 6px; height: 6px; border-right: 1.5px solid #343A40; border-bottom: 1.5px solid #343A40; transform: rotate(45deg) translateY(-2px); margin-left: auto }
+.scr .lab { font-size: 12px; color: #5B6472; font-weight: 600; margin-bottom: 5px; line-height: 18px }
+.scr .lab em { font-style: normal; color: #FF3366 }
+.scr .msg, .scr .tiny { font-size: 11px; color: #8A929E; line-height: 16.5px }
+.scr .msg { margin-top: 4px } .scr .msg.err { color: #FF3366 } .scr .msg.wrn { color: #A06A00 }
+/* 가능/불가/미확인: 사이트의 토글 · 배지 모양을 쓴다 */
+.scr .seg { display: inline-flex; gap: 6px; flex-wrap: wrap }
+.scr .seg span { height: 30px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #5B6472; border: 1px solid #D5D9E0; border-radius: 4px; background: #FFFFFF; white-space: nowrap }
+.scr .seg span::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #C3C8D1 }
+.scr .seg span.on { background: #E8EFFF; border-color: #3D6FD6; color: #1346A6 } .scr .seg span.on::before { background: #3D6FD6 }
+.scr .seg span.on.q { background: #F4F6F9; border-color: #7987A1; color: #35404F } .scr .seg span.on.q::before { background: #7987A1 }
+.scr .tg { display: inline-flex; align-items: center; height: 19.5px; padding: 3px 5px 1px; border-radius: 3px; font-size: 10.5px; font-weight: 700; line-height: 1; white-space: nowrap }
+.scr .t-ok { background: #E1F5EC; color: #0E8A5A } .scr .t-wr { background: #FFF4D9; color: #A06A00 } .scr .t-bad { background: #FFE5EC; color: #E0204F } .scr .t-mu { background: #E9ECEF; color: #212529 } .scr .t-in { background: #E8EFFF; color: #1346A6 }
+.scr .t-ops { background: #7987A1; color: #FFFFFF } .scr .t-demo { background: #FFF4D9; color: #A06A00 } .scr .t-na { background: #E9ECEF; color: #5B6472 }
+.scr .note { position: relative; display: block; padding: 8px 10px 8px 26px; border-radius: 4px; font-size: 11.5px; line-height: 17.6px; background: #F4F6F9; color: #6B7482 }
+.scr .note::before { content: "i"; position: absolute; left: 9px; top: 9px; width: 12px; height: 12px; border-radius: 50%; display: grid; place-items: center; font-size: 9px; font-weight: 800; background: #8A929E; color: #FFFFFF }
+.scr .note.w { background: #FFF8E6; color: #8A5C00 } .scr .note.w::before { content: "!"; background: #D69A00 }
+.scr .note.e { background: #FFEEF2; color: #C0163F } .scr .note.e::before { content: "!"; background: #FF3366 }
+.scr .note.g { background: #E9F7F0; color: #0E7A50 } .scr .note.g::before { content: "✓"; background: #10B759 }
+.scr .note.i { background: #F4F6F9; color: #6B7482 }
+.scr table.t { width: 100%; border-collapse: collapse; font-size: 13px; color: #212529 }
+.scr table.t th { text-align: left; font-size: 13px; color: #000000; font-weight: 700; padding: 10px 12px; border-bottom: 1px solid #E8EBF1; white-space: nowrap }
+.scr table.t td { padding: 10px 12px; border-bottom: 1px solid #E8EBF1; white-space: nowrap }
+.scr table.t tr:last-child td { border-bottom: 0 }
+.scr table.t.tight td { padding: 6px 8px }
+.scr table.t.wrap td { white-space: normal } .scr table.t.wrap td .btn, .scr table.t.wrap td .tg { white-space: nowrap } .scr table.t.wrap td:first-child { white-space: nowrap }
+.scr table.t tr.on td { background: #F3F4FE }
+.scr table.t td.r, .scr table.t th.r { text-align: right; font-variant-numeric: tabular-nums }
+/* 현황 카드: 기존 홈 카드(라벨 · 파란 큰 값 · 보조 문구), 아이콘 없음 */
+.scr .kpi { display: block; padding: 20px 24px }
+.scr .kpi .ic { display: none }
+.scr .kpi .k { font-size: 14px; font-weight: 600; color: #000000; display: flex; gap: 6px; align-items: center }
+.scr .kpi .v { font-size: 28px; font-weight: 600; line-height: 36px; color: #2E9E6B; margin: 2px 0 2px; font-variant-numeric: tabular-nums }
+.scr .kpi .s { font-size: 13px; color: #686868 }
+.scr .stp { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #8A929E; white-space: nowrap }
+.scr .stp b { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #C3C8D1; color: #8A929E; display: grid; place-items: center; font-size: 10.5px; font-weight: 700 }
+.scr .stp .on { color: #2E9E6B; font-weight: 600 } .scr .stp .on b { background: #2E9E6B; border-color: #2E9E6B; color: #FFFFFF }
+.scr .stp .done { color: #5B6472 } .scr .stp .done b { border-color: #7987A1; color: #7987A1 }
+.scr .stp i { width: 14px; height: 1px; background: #C3C8D1 }
+.scr .stp em { font-style: normal; font-size: 10.5px }
+.scr .tabsx { display: flex; gap: 2px; border-bottom: 1px solid #E8EBF1 }
+.scr .tabsx span { padding: 8px 16px; font-size: 13px; color: #5B6472; border: 1px solid transparent; border-radius: 4px 4px 0 0; margin-bottom: -1px }
+.scr .tabsx span.on { color: #2E9E6B; font-weight: 600; background: #FFFFFF; border-color: #E8EBF1 #E8EBF1 #FFFFFF }
+/* 지도: 카카오 지도 톤(연한 지형 · 노란 도로 · 하늘색 하천) + 사이트의 오버레이 박스 */
+.scr .mapw { position: relative; border-radius: 0; overflow: hidden; background: #EEF1EC }
+.scr .mapw svg.map { position: absolute; inset: 0; width: 100%; height: 100% }
+.scr .zoom { position: absolute; right: 8px; top: 8px; width: 28px; background: #FFFFFF; border: 1px solid #D5D9E0; border-radius: 3px; display: grid; justify-items: center; font-size: 16px; color: #333333; box-shadow: 0 1px 2px rgba(0, 0, 0, .12) }
+.scr .zoom span { height: 26px; line-height: 26px } .scr .zoom i { width: 3px; height: 62px; background: #E0E0E0; position: relative; margin: 2px 0 } .scr .zoom i::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 42px; background: #3396FF } .scr .zoom i::before { content: ""; position: absolute; left: -6px; top: 14px; width: 15px; height: 6px; background: #3396FF; border-radius: 2px; z-index: 1 }
+.scr .scale { position: absolute; left: 8px; bottom: 6px; display: flex; align-items: flex-end; gap: 4px; font: 700 10px/1 "Overpass", sans-serif; color: #333333 } .scr .scale i { width: 46px; height: 5px; border: 1.5px solid #333333; border-top: 0 } .scr .scale b { font-size: 11px; letter-spacing: -.02em }
+.scr .lyr { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px }
+.scr .lyr span { height: 28px; padding: 0 9px; border-radius: 4px; background: #E8EFFF; border: 1px solid #3D6FD6; color: #1346A6; display: inline-flex; align-items: center; gap: 6px; font-size: 12px }
+.scr .lyr span::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #3D6FD6 }
+.scr .lyr span.no { background: #FFFFFF; border-color: #D5D9E0; color: #5B6472 } .scr .lyr span.no::before { background: #C3C8D1 }
+.scr .lgd, .scr .ibox { position: absolute; background: rgba(255, 255, 255, .95); border: 1px solid #DFE3E8; border-radius: 6px; box-shadow: 0 2px 10px 0 rgba(28, 46, 74, .12); padding: 10px 12px; font-size: 11px; line-height: 16.5px; color: #35404F; display: grid; gap: 4px }
+.scr .lgd { right: 10px; bottom: 10px } .scr .ibox { left: 10px; top: 10px; min-width: 150px }
+.scr .lgd b, .scr .ibox b { font-weight: 700 }
+.scr .lgd div, .scr .ibox div { display: flex; gap: 6px; align-items: center }
+.scr .ibox div span:first-child { color: #8A929E; width: 56px }
+.scr .lgd i { width: 16px; height: 10px; border-radius: 2px; flex: none }
+.scr .mtag { position: absolute; left: 92px; bottom: 5px; font-size: 10px; color: #6B7482 }
+.scr .row { display: flex; gap: 20px; min-height: 0 }
+.scr .g { display: grid; gap: 20px; min-height: 0 }
+.scr .fr { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 8px 10px; align-items: center }
+.scr .fr > .lab { margin: 0 }
+.scr .fr { gap: 5px 10px } .scr .fr .seg span { height: 24px } .scr .fr .inp, .scr .fr .sel { height: 26px }
+.scr .ck { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #212529 }
+.scr .ck i { width: 15px; height: 15px; border-radius: 2px; border: 1px solid #ADB5BD; background: #FFFFFF; flex: none; display: grid; place-items: center; font-style: normal; font-size: 10px; color: #FFFFFF }
+.scr .ck i.on { background: #2E9E6B; border-color: #2E9E6B } .scr .ck i.on::after { content: "✓" }
+.scr .ck i.lock { background: #E9ECEF }
+.scr .ck.dis { color: #ADB5BD }
+/* 목록: 사이트의 목록 항목 패턴 */
+.scr .li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-bottom: 1px solid #EEF1F5; border-left: 3px solid transparent; background: #FFFFFF }
+.scr .li.on { border-left-color: #2E9E6B; background: #F3F4FE }
+.scr .li .tt { font-weight: 600; font-size: 13px; color: #35404F } .scr .li .sub { font-size: 11px; color: #8A929E }
+.scr .lbox { border: 1px solid #E8EBF1; border-radius: 3px; overflow: hidden }
+.scr .lbox .li:last-child { border-bottom: 0 }
+.scr .shade { position: absolute; inset: 0; background: rgba(0, 0, 0, .4); z-index: 5 }
+.scr .modal { position: absolute; z-index: 6; background: #FFFFFF; border-radius: 4px; box-shadow: 0 6px 30px rgba(0, 0, 0, .25); padding: 0; display: flex; flex-direction: column }
+.scr .modal h3 { margin: 0; padding: 16px 20px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #E8EBF1 }
+.scr .modal .mb { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0 }
+.scr .modal .x { margin-left: auto; width: 24px; height: 24px; display: grid; place-items: center; color: #6C757D; font-size: 16px; font-weight: 400 }
+.scr .modal .foot { display: flex; gap: 8px; justify-content: flex-end; align-items: center; padding: 12px 20px; border-top: 1px solid #E8EBF1 }
+.scr .dimmed { position: absolute; inset: 0 }
+.scr .mono { font-family: "Overpass Mono", "Overpass", ui-monospace, monospace; font-size: 12px }
+.scr .toast { position: absolute; z-index: 7; right: 25px; top: 76px; background: #FFFFFF; color: #212529; border-radius: 4px; padding: 12px 16px; font-size: 13px; display: flex; gap: 10px; align-items: center; box-shadow: 0 0 10px rgba(0, 0, 0, .2); border-left: 4px solid #10B759 }
+.scr .toast b { color: #000000 }
+.scr .demo { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #A06A00 }

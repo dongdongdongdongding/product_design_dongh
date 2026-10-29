@@ -1,0 +1,13 @@
+{
+  "title": "<서비스명> 플로우 맵",
+  "subtitle": "추가개발 v1.0 · 화면 · 연결 · 기능정의 · 검토 이슈",
+  "docsTitle": "추가개발 문서 v1.0",
+  "docsSub": "docs/*.md에서 생성",
+  "designTitle": "<서비스명> 화면 디자인",
+  "docs": "docs",
+  "featureDoc": "추가개발-기능정의서.md",
+  "specDoc": "추가개발-상세명세.md",
+  "wbsDoc": "추가개발-WBS.md",
+  "expect": "",
+  "out": "flowmap.html"
+}

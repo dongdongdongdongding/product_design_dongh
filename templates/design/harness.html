@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>dc 검수</title>
+<!-- 사용: 이 파일을 디자인 폴더(project/ 의 부모)에 두고 http://127.0.0.1:<port>/harness.html 로 연다. renderAll(['Main', ...]) 후 audit() -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@300;400;600;700;800&display=swap">
+<style>
+body { margin: 0; background: #DDD }
+.board { position: relative; width: 1440px; height: 940px; overflow: hidden; background: #FFF; margin: 0 0 40px }
+.board > .dcroot { width: 100%; height: 100% }
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script>
+// 이 프로젝트의 .dc.html이 쓰는 문법만 해석하는 검수용 렌더러: {{a.b}}, sc-for list/as, sc-if value, dc-import(속성 → props), class Component extends DCLogic { renderVals() }
+class DCLogic { constructor(props) { this.props = props || {}; } }
+const cache = {};
+async function load(name) {
+  if (cache[name]) return cache[name];
+  const txt = await (await fetch('project/' + name + '.dc.html?' + Date.now())).text();
+  const doc = new DOMParser().parseFromString(txt, 'text/html');
+  // 보드가 링크한 스타일시트(site.css · theme.css 등)를 함께 불러온다
+  doc.querySelectorAll('head link[rel=stylesheet]').forEach((l) => { const href = l.getAttribute('href'); if (!href || /^https?:/.test(href)) return; const u = 'project/' + href; if (!document.querySelector('link[data-dc="' + u + '"]')) { const n = document.createElement('link'); n.rel = 'stylesheet'; n.href = u; n.dataset.dc = u; document.head.appendChild(n); } });
+  const sc = doc.querySelector('script[data-dc-script]');
+  const Comp = new Function('DCLogic', sc.textContent + '\nreturn Component;')(DCLogic);
+  const x = doc.querySelector('x-dc');
+  x.querySelectorAll('helmet').forEach((h) => h.remove());
+  return (cache[name] = { Comp: Comp, tpl: x, preview: JSON.parse(sc.getAttribute('data-props') || '{}').$preview });
+}
+const look = (scope, path) => path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), scope);
+const holeOnly = (s) => { const m = /^\{\{\s*([\w.]+)\s*\}\}$/.exec(s.trim()); return m ? m[1] : null; };
+const fill = (s, scope) => s.replace(/\{\{\s*([\w.]+)\s*\}\}/g, (m, p) => { const v = look(scope, p); return v == null ? '' : String(v); });
+const camel = (s) => s.replace(/-([a-z])/g, (m, c) => c.toUpperCase());
+async function renderInto(name, props, host) {
+  const d = await load(name), vals = new d.Comp(props).renderVals();
+  const scope = Object.assign({}, vals);
+  for (const n of [...d.tpl.childNodes]) await walk(n, scope, host);
+}
+async function walk(n, scope, parent) {
+  if (n.nodeType === 3) { parent.appendChild(document.createTextNode(fill(n.textContent, scope))); return; }
+  if (n.nodeType !== 1) return;
+  const tag = n.tagName.toLowerCase();
+  if (tag === 'sc-for') { const list = look(scope, holeOnly(n.getAttribute('list'))) || [], as = n.getAttribute('as'); for (const it of list) { const s2 = Object.assign({}, scope); s2[as] = it; for (const c of [...n.childNodes]) await walk(c, s2, parent); } return; }
+  if (tag === 'sc-if') { const v = look(scope, holeOnly(n.getAttribute('value'))); if (v) for (const c of [...n.childNodes]) await walk(c, scope, parent); return; }
+  if (tag === 'dc-import') {
+    const props = {};
+    for (const a of n.attributes) { if (a.name === 'name' || a.name === 'style' || a.name.indexOf('hint-') === 0) continue; const h = holeOnly(a.value); props[camel(a.name)] = h ? look(scope, h) : a.value; }
+    const box = document.createElement('div'); box.className = 'dcimport'; box.dataset.name = n.getAttribute('name'); box.style.cssText = n.getAttribute('style') || '';
+    parent.appendChild(box); await renderInto(n.getAttribute('name'), props, box); return;
+  }
+  const isSvg = parent.namespaceURI === 'http://www.w3.org/2000/svg' || tag === 'svg';
+  const e = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', n.tagName) : document.createElement(tag);
+  for (const a of n.attributes) e.setAttribute(a.name, fill(a.value, scope));
+  parent.appendChild(e);
+  for (const c of [...n.childNodes]) await walk(c, scope, e);
+}
+window.renderBoard = async (name) => {
+  const b = document.createElement('div'); b.className = 'board'; b.dataset.name = name;
+  const r = document.createElement('div'); r.className = 'dcroot'; b.appendChild(r);
+  document.getElementById('out').appendChild(b);
+  await renderInto(name, {}, r); return b;
+};
+
+window.audit = () => {
+ const MAP={D1:'D1',Main:'D1',R1:'R1',R2:'R2',R3:'R3',S1:'S1',S2:'S2',P1:'P1',P2:'P2',P3:'P3',M1:'M1',M2:'M2',M3:'M3',C1:'C1'};
+ const FL=JSON.parse(localStorage.getItem('fmLabels')||'{}'); const out=[];
+ const T=(e)=>(e.textContent||'').replace(/\s+/g,' ').trim().slice(0,28);
+ for (const b of document.querySelectorAll('.board')){ const nm=b.dataset.name, B=b.getBoundingClientRect(); const isOverlay=!!b.querySelector('.modal');
+  const own=(x)=>!x.closest('.dimmed') && !(isOverlay&&x.closest('.dcimport'));
+  const els=[...b.querySelectorAll('*')].filter(x=>!(x.closest('svg')&&x.tagName.toLowerCase()!=='svg') && !x.closest('.dcimport[data-name=Map]') && own(x));
+  let worst=0, wEl=null; els.forEach(x=>{ const r=x.getBoundingClientRect(); const o=r.bottom-B.bottom; if(r.height&&o>1&&(x.classList.contains('card') || x.classList.contains('c'))) out.push(nm+' | 보드 아래로 잘린 카드 | "'+T(x)+'" '+Math.round(o)+'px'); if(o>worst){worst=o;wEl=x;} });
+  if(worst>1) out.push(nm+' | 보드(940) 아래로 넘침 '+Math.round(worst)+'px ('+(wEl.className||wEl.tagName)+')');
+  els.forEach(x=>{ const box=x.parentElement&&x.parentElement.closest('.card, .c, .modal, .mapbox, .mapw, .list, .lbox, .toast'); if(!box) return; const r=x.getBoundingClientRect(), q=box.getBoundingClientRect(); const o=Math.max(r.right-q.right,q.left-r.left,r.bottom-q.bottom); if(r.width>0&&o>2) out.push(nm+' | 영역 밖으로 넘침 | '+(x.className||x.tagName)+' "'+T(x)+'" '+Math.round(o)+'px (in '+box.className+')'); });
+  els.forEach(x=>{ if(x.tagName.toLowerCase()==='svg') return; const cs=getComputedStyle(x); if(cs.position==='absolute'&&cs.clip!=='auto') return; if((cs.overflowX!=='visible'||cs.overflowY!=='visible') && cs.textOverflow!=='ellipsis' && !x.classList.contains('board') && !x.classList.contains('mapbox') && !x.classList.contains('mapw') && !x.classList.contains('scr') && (x.scrollWidth>x.clientWidth+2||x.scrollHeight>x.clientHeight+2)) out.push(nm+' | 내용 잘림(스크롤/숨김) | '+(x.className||x.tagName)+' "'+T(x)+'" '+(x.scrollWidth-x.clientWidth)+'×'+(x.scrollHeight-x.clientHeight)); });
+  const cs=[...b.querySelectorAll('.card, .c, .note, .crumbs, .ph, .tabs, .tabsx, .row, .grid2, .grid3, .grid4')].filter(own);
+  for(let i=0;i<cs.length;i++)for(let j=i+1;j<cs.length;j++){const A=cs[i],C=cs[j]; if(A.contains(C)||C.contains(A)) continue; const P=A.getBoundingClientRect(),Q=C.getBoundingClientRect(); const ox=Math.min(P.right,Q.right)-Math.max(P.left,Q.left), oy=Math.min(P.bottom,Q.bottom)-Math.max(P.top,Q.top); if(ox>2&&oy>2) out.push(nm+' | 영역끼리 겹침 | "'+T(A)+'" × "'+T(C)+'" '+Math.round(ox)+'×'+Math.round(oy)); }
+  const ct=[...b.querySelectorAll('.content, .ct')].filter(own)[0]; if(ct){ const q=ct.getBoundingClientRect(); let mb=q.top; [...ct.children].forEach(c=>{mb=Math.max(mb,c.getBoundingClientRect().bottom)}); const gap=Math.min(q.bottom,B.bottom-40)-mb; if(gap>60) out.push(nm+' | 하단 빈 공간 | '+Math.round(gap)+'px'); }
+  b.querySelectorAll('.card, .c').forEach(c=>{ if(!own(c)) return; const q=c.getBoundingClientRect(); const kids=[...c.children].map(k=>k.getBoundingClientRect()).filter(r=>r.height>0).sort((a,b)=>a.top-b.top); let gapMax=0, prev=q.top+20; kids.forEach(r=>{ gapMax=Math.max(gapMax, r.top-prev); prev=Math.max(prev,r.bottom); }); gapMax=Math.max(gapMax, q.bottom-20-prev); if(gapMax>80) out.push(nm+' | 카드 안 빈 공간 | "'+T(c)+'" '+Math.round(gapMax)+'px'); });
+  const txt=b.innerText.replace(/\s+/g,' '); const lab=FL[MAP[nm]]||[]; const miss=lab.filter(t=>!txt.includes(t) && !txt.replace(/ /g,'').includes(t.replace(/ /g,''))); if(miss.length) out.push(nm+' | 플로우 맵 대비 없음 | '+miss.join(' / '));
+ }
+ return [...new Set(out)].join('\n');
+};
+window.renderAll = async (names) => { document.getElementById('out').innerHTML=''; for (const k in cache) delete cache[k]; for (const n of names) await renderBoard(n); await document.fonts.ready; return 'ok'; };
+
+</script>
+</body>
+</html>

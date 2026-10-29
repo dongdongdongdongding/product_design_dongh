@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+node_modules/
+# 빌드 결과는 예시만 커밋한다
+/templates/project-starter/flowmap.html

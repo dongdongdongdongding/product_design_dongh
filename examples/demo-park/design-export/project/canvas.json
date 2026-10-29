@@ -1,0 +1,130 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-10-29T08:13:33Z"
+ },
+ "title": "푸른숲공원 예약 관리 화면 디자인",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "D1.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "D1 대시보드",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "F1.dc.html": {
+   "x": 0,
+   "y": 1600,
+   "w": 1440,
+   "h": 900,
+   "title": "F1 시설 목록 · 지도",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "F2.dc.html": {
+   "x": 1520,
+   "y": 1600,
+   "w": 1440,
+   "h": 900,
+   "title": "F2 시설 등록 · 위치 선택",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "B1.dc.html": {
+   "x": 0,
+   "y": 3200,
+   "w": 1440,
+   "h": 900,
+   "title": "B1 예약 목록",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "B2.dc.html": {
+   "x": 1520,
+   "y": 3200,
+   "w": 1440,
+   "h": 900,
+   "title": "B2 예약 상세 · 승인/반려",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "D1.dc.html",
+  "F1.dc.html",
+  "F2.dc.html",
+  "B1.dc.html",
+  "B2.dc.html"
+ ],
+ "notes": {
+  "t0": {
+   "x": 0,
+   "y": -300,
+   "text": "01 대시보드 · 오늘 현황과 처리할 일",
+   "kind": "title1",
+   "maxW": 1440
+  },
+  "s-D1": {
+   "x": 0,
+   "y": 960,
+   "w": 1440,
+   "size": "s",
+   "fill": "gray",
+   "text": "D1 · DASH-01·DASH-02 — 오늘 예약과 처리할 일을 한 화면에서 봅니다."
+  },
+  "t1": {
+   "x": 0,
+   "y": 1300,
+   "text": "02 시설 관리 · 시설 등록 · 수정 · 위치",
+   "kind": "title1",
+   "maxW": 2960
+  },
+  "s-F1": {
+   "x": 0,
+   "y": 2560,
+   "w": 1440,
+   "size": "s",
+   "fill": "gray",
+   "text": "F1 · FAC-01 — 시설을 지도와 목록으로 함께 관리합니다."
+  },
+  "s-F2": {
+   "x": 1520,
+   "y": 2560,
+   "w": 1440,
+   "size": "s",
+   "fill": "gray",
+   "text": "F2 · FAC-02·FAC-03 — 시설 정보를 입력하고 위치를 지도에서 고릅니다."
+  },
+  "t2": {
+   "x": 0,
+   "y": 2900,
+   "text": "03 예약 관리 · 예약 승인 · 반려",
+   "kind": "title1",
+   "maxW": 2960
+  },
+  "s-B1": {
+   "x": 0,
+   "y": 4160,
+   "w": 1440,
+   "size": "s",
+   "fill": "gray",
+   "text": "B1 · BOOK-01 — 예약을 상태별로 보고 처리합니다."
+  },
+  "s-B2": {
+   "x": 1520,
+   "y": 4160,
+   "w": 1440,
+   "size": "s",
+   "fill": "gray",
+   "text": "B2 · BOOK-02 — 예약 내용을 확인하고 승인하거나 반려합니다."
+  }
+ },
+ "designSystems": []
+}

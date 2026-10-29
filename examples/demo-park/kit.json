@@ -1,0 +1,13 @@
+{
+  "title": "푸른숲공원 예약 관리 플로우 맵",
+  "subtitle": "가상 예시 · 추가개발 v1.1 · 화면 · 연결 · 기능정의 · 검토 이슈",
+  "docsTitle": "추가개발 문서 v1.1",
+  "docsSub": "docs/*.md에서 생성",
+  "designTitle": "푸른숲공원 예약 관리 화면 디자인",
+  "docs": "docs",
+  "featureDoc": "추가개발-기능정의서.md",
+  "specDoc": "추가개발-상세명세.md",
+  "wbsDoc": "추가개발-WBS.md",
+  "expect": "",
+  "out": "flowmap.html"
+}

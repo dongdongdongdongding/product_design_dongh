@@ -1,0 +1,34 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: plugin manifest JSON
+        run: |
+          python -c "import json; json.load(open('.claude-plugin/plugin.json')); json.load(open('.claude-plugin/marketplace.json'))"
+      - name: docs consistency (demo)
+        run: python scripts/check_docs.py --docs examples/demo-park/docs --screens D1,F1,F2,B1,B2
+      - name: docs consistency (starter)
+        run: python scripts/check_docs.py --docs templates/project-starter/docs
+      - name: build demo
+        run: python scripts/build_kit.py examples/demo-park
+      - name: build starter
+        run: python scripts/build_kit.py templates/project-starter
+      - name: export design
+        run: node scripts/export_design.mjs examples/demo-park /tmp/design-out
+      - name: JS syntax
+        run: |
+          for f in engine/*.js scripts/audits/*.js examples/demo-park/*.js templates/project-starter/*.js; do node --check "$f" 2>/dev/null || node -e "new Function(require('fs').readFileSync('$f','utf8'))" || exit 1; done

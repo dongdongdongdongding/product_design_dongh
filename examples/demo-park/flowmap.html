@@ -1,0 +1,1493 @@
+<meta charset="utf-8">
+<title>푸른숲공원 예약 관리 플로우 맵</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Overpass:wght@300;400;600;700;800&family=Overpass+Mono:wght@400;600&display=swap">
+<style>
+/* 레이아웃: 상단 툴바 · 왼쪽 화면/이슈 패널 · 지형도 점격자 캔버스(메뉴=섹션, 화면=1440×900 프레임) · 오른쪽 인스펙터 · 문서 패널 오버레이 */
+:root {
+  --canvas: #E4E9E6; --dot: #C6D0CA; --chrome: #FFFFFF; --chrome-2: #F2F5F3; --line: #DEE4E0;
+  --fg: #14201B; --fg-2: #56645D; --fg-3: #87948D;
+  --accent: #127A5E; --accent-soft: rgba(18, 122, 94, .12); --accent-fg: #FFFFFF;
+  --back: #96A39C; --section: rgba(255, 255, 255, .5); --section-line: rgba(20, 32, 27, .08);
+  --card: #FFFFFF; --shadow: 0 1px 2px rgba(20, 32, 27, .06), 0 8px 28px rgba(20, 32, 27, .09);
+  --high: #C8361F; --high-soft: #FBE9E5; --mid: #A65A07; --mid-soft: #FDF1DF; --low: #4D5E78; --low-soft: #EBEFF5; --good: #127A5E; --good-soft: #E2F3EC;
+  --ui: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --canvas: #171C1A; --dot: #29312D; --chrome: #1F2522; --chrome-2: #272E2B; --line: #343D38;
+  --fg: #E8EEEA; --fg-2: #A5B2AB; --fg-3: #7B8882;
+  --accent: #4FCBA4; --accent-soft: rgba(79, 203, 164, .16); --accent-fg: #06261C;
+  --back: #69766F; --section: rgba(255, 255, 255, .025); --section-line: rgba(255, 255, 255, .07);
+  --card: #1F2522; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .35);
+  --high: #FF8A73; --high-soft: rgba(255, 138, 115, .14); --mid: #F2B45A; --mid-soft: rgba(242, 180, 90, .14); --low: #A9B6CC; --low-soft: rgba(169, 182, 204, .14); --good: #4FCBA4; --good-soft: rgba(79, 203, 164, .14);
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --canvas: #171C1A; --dot: #29312D; --chrome: #1F2522; --chrome-2: #272E2B; --line: #343D38;
+  --fg: #E8EEEA; --fg-2: #A5B2AB; --fg-3: #7B8882;
+  --accent: #4FCBA4; --accent-soft: rgba(79, 203, 164, .16); --accent-fg: #06261C;
+  --back: #69766F; --section: rgba(255, 255, 255, .025); --section-line: rgba(255, 255, 255, .07);
+  --card: #1F2522; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 28px rgba(0, 0, 0, .35);
+  --high: #FF8A73; --high-soft: rgba(255, 138, 115, .14); --mid: #F2B45A; --mid-soft: rgba(242, 180, 90, .14); --low: #A9B6CC; --low-soft: rgba(169, 182, 204, .14); --good: #4FCBA4; --good-soft: rgba(79, 203, 164, .14);
+  color-scheme: dark }
+html, body { height: 100%; overflow: hidden }
+body { background: var(--chrome); color: var(--fg); font: 13px/1.5 var(--ui); -webkit-font-smoothing: antialiased }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer }
+button:focus-visible, [tabindex]:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px }
+.app { height: 100%; display: grid; grid-template-columns: 268px minmax(0, 1fr) 360px; grid-template-rows: 48px minmax(0, 1fr) }
+.top { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--line); background: var(--chrome); padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); min-width: 0 }
+.brand { flex: 0 1 auto; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; white-space: nowrap; min-width: 0; overflow: hidden }
+.brand svg { width: 20px; height: 20px; flex: none; color: var(--accent) }
+.brand small { font-weight: 500; color: var(--fg-3); font-size: 12px; overflow: hidden; text-overflow: ellipsis }
+.spacer { flex: 1 }
+.tb { height: 32px; min-width: 32px; padding: 0 10px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; color: var(--fg-2); font-weight: 500; white-space: nowrap }
+.tb:hover { background: var(--chrome-2); color: var(--fg) }
+.tb[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent) }
+.tb.primary { background: var(--accent); color: var(--accent-fg); font-weight: 600 }
+.tb.primary:hover { filter: brightness(1.06); background: var(--accent); color: var(--accent-fg) }
+.tb svg { width: 16px; height: 16px; flex: none }
+.zoomval { font-family: var(--mono); font-size: 12px; min-width: 52px; font-variant-numeric: tabular-nums }
+.sep { width: 1px; height: 20px; background: var(--line); margin: 0 4px }
+.layers { display: flex; gap: 2px }
+@media (max-width: 1480px) { .brand small { display: none } }
+
+.left { border-right: 1px solid var(--line); background: var(--chrome); display: flex; flex-direction: column; min-height: 0 }
+.tabs { display: flex; gap: 4px; padding: 8px 10px; border-bottom: 1px solid var(--line) }
+.tab { flex: 1; height: 30px; border-radius: 7px; font-weight: 600; color: var(--fg-2) }
+.tab[aria-selected="true"] { background: var(--chrome-2); color: var(--fg) }
+.scroll { overflow-y: auto; min-height: 0; flex: 1 }
+.flow { padding: 6px 6px 10px }
+.flow h3 { margin: 0; padding: 8px 8px 4px; font-size: 12px; font-weight: 700; color: var(--fg-2); display: flex; justify-content: space-between; gap: 8px; cursor: pointer; border-radius: 6px }
+.flow h3:hover { color: var(--fg) }
+.flow h3 span { font-family: var(--mono); font-weight: 500; color: var(--fg-3) }
+.item { width: 100%; display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 7px; text-align: left; color: var(--fg) }
+.item:hover { background: var(--chrome-2) }
+.item[aria-current="true"] { background: var(--accent-soft) }
+.item .id { font-family: var(--mono); font-size: 11px; color: var(--fg-3); width: 26px; flex: none }
+.item .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.item .kd { font-size: 11px; color: var(--fg-3); flex: none }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex: none }
+.dot.high { background: var(--high) } .dot.mid { background: var(--mid) } .dot.low { background: var(--low) } .dot.ok { background: var(--good) }
+
+.stage { position: relative; overflow: hidden; background-color: var(--canvas); touch-action: none; cursor: grab; min-width: 0; -webkit-user-select: none; user-select: none }
+svg.edges text { -webkit-user-select: none; user-select: none }
+.stage.dragging { cursor: grabbing }
+.grid { position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(var(--dot) 1px, transparent 1.2px) }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform }
+.section { position: absolute; border-radius: 36px; background: var(--section); box-shadow: inset 0 0 0 1px var(--section-line) }
+.section h2 { position: absolute; left: 48px; top: 40px; margin: 0; font-size: 64px; line-height: 1.15; font-weight: 700; letter-spacing: -.01em; white-space: nowrap }
+.section h2 b { font-family: var(--mono); font-weight: 600; color: var(--fg-3); font-size: 40px; margin-right: 20px }
+.section p { position: absolute; left: 50px; top: 130px; margin: 0; font-size: 28px; color: var(--fg-2); white-space: nowrap }
+.frame { position: absolute; width: 1440px }
+.frame .ft { position: absolute; left: 2px; bottom: calc(100% + 14px); display: flex; gap: 14px; align-items: baseline; white-space: nowrap; font-size: 26px; font-weight: 600; color: var(--fg-2); cursor: pointer }
+.frame .ft b { font-family: var(--mono); font-weight: 600; color: var(--fg-3) }
+.frame .ft i { font-style: normal; font-size: 18px; font-weight: 600; padding: 2px 10px; border-radius: 8px; background: var(--chrome-2); color: var(--fg-2) }
+.frame.sel .ft, .frame.sel .ft b { color: var(--accent) }
+.shot { position: relative; width: 1440px; height: 900px; border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); cursor: pointer }
+.frame.sel .shot { box-shadow: 0 0 0 6px var(--accent), var(--shadow) }
+.pin { position: absolute; top: -18px; right: -18px; min-width: 44px; height: 44px; padding: 0 14px; border-radius: 22px; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; font-size: 20px; color: #FFFFFF; box-shadow: 0 0 0 4px var(--canvas); cursor: pointer; z-index: 2 }
+.pin.high { background: #C8361F } .pin.mid { background: #B86508 } .pin.low { background: #55667F } .pin.ok { background: #127A5E }
+.spec { position: absolute; left: 0; width: 1440px; background: var(--card); border-radius: 24px; box-shadow: var(--shadow); padding: 30px 34px; font-size: 21px; line-height: 1.55; cursor: pointer; display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 28px }
+.spec h4 { grid-column: 1 / -1; margin: 0; font-size: 28px; font-weight: 700; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap }
+.spec h4 b { font-family: var(--mono); color: var(--fg-3); font-weight: 600; font-size: 22px }
+.spec h4 small { font-size: 20px; font-weight: 500; color: var(--fg-2) }
+.spec dt { font-size: 16px; font-weight: 700; color: var(--fg-3); letter-spacing: .05em; margin-bottom: 6px }
+.spec dd { margin: 0 0 16px }
+.spec ul { margin: 0; padding-left: 24px; display: grid; gap: 4px }
+.spec .chips { display: flex; gap: 8px; flex-wrap: wrap }
+.spec .chips .chip { height: 30px; font-size: 16px; padding: 0 10px }
+.chip { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; font-size: 12px; font-weight: 700; white-space: nowrap; flex: none; background: var(--chrome-2); color: var(--fg-2) }
+.chip.high { background: var(--high-soft); color: var(--high) } .chip.mid { background: var(--mid-soft); color: var(--mid) } .chip.low { background: var(--low-soft); color: var(--low) } .chip.good { background: var(--good-soft); color: var(--good) } .chip.acc { background: var(--accent-soft); color: var(--accent) }
+svg.edges { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none }
+svg.edges path { fill: none; stroke-linecap: round; stroke-linejoin: round }
+svg.edges .hit { stroke: transparent; stroke-width: 34; pointer-events: stroke; cursor: pointer }
+svg.edges .e { stroke: var(--accent); stroke-width: 5; opacity: .55; pointer-events: none }
+svg.edges .e.back { stroke: var(--back); stroke-dasharray: 14 12 }
+svg.edges .ah { fill: var(--accent) } svg.edges .ah.back { fill: var(--back) }
+svg.edges .port { fill: var(--accent); stroke: var(--card); stroke-width: 4 } svg.edges .port.back { fill: var(--back) }
+svg.edges .lbl { pointer-events: all; cursor: pointer }
+svg.edges .lbl rect { fill: var(--accent) } svg.edges .lbl text { fill: var(--accent-fg); font: 600 22px var(--ui) }
+svg.edges .lbl.back rect { fill: var(--back) } svg.edges .lbl.back text { fill: #FFFFFF }
+svg.edges .eg:hover .e { opacity: 1; stroke-width: 7 }
+svg.edges .eg.hi .e { opacity: 1; stroke-width: 11 } svg.edges .eg.hi .lbl rect { stroke: var(--card); stroke-width: 4 }
+svg.edges .eg.dim { opacity: .1 } svg.edges .eg.dim:hover { opacity: .6 }
+svg.edges.mode-back .e { opacity: .45 }
+.shot .hs-on { outline: 6px solid var(--accent) !important; outline-offset: 4px; animation: hsPulse 1.2s ease-in-out 3 }
+@keyframes hsPulse { 50% { outline-color: transparent } }
+.emode { display: inline-flex; gap: 2px; padding: 2px; border-radius: 9px; background: var(--chrome-2); margin-left: 2px }
+.emode button { height: 28px; padding: 0 9px; border-radius: 7px; font-size: 12px; font-weight: 600; color: var(--fg-2) }
+.emode button[aria-pressed="true"] { background: var(--chrome); color: var(--accent); box-shadow: 0 1px 2px rgba(0,0,0,.12) }
+.hide-edges .emode { opacity: .4; pointer-events: none }
+.show-hs .shot [data-go] { outline: 3px solid rgba(18, 122, 94, .75); outline-offset: 2px; box-shadow: 0 0 0 9999px transparent }
+.show-hs .shot [data-go]:hover { background-color: rgba(18, 122, 94, .12) }
+.hide-edges svg.edges, .hide-spec .spec, .hide-ux .pin { display: none }
+.minimap { position: absolute; right: 12px; bottom: 12px; width: 200px; height: 150px; border-radius: 10px; background: var(--chrome); box-shadow: var(--shadow); overflow: hidden; cursor: pointer }
+.minimap canvas { width: 100%; height: 100%; display: block }
+.hint { position: absolute; left: 12px; bottom: 12px; padding: 6px 10px; border-radius: 8px; background: var(--chrome); box-shadow: var(--shadow); font-size: 12px; color: var(--fg-2); pointer-events: none }
+.hint kbd, .keys kbd { font-family: var(--mono); font-size: 11px; padding: 1px 5px; border-radius: 4px; background: var(--chrome-2); color: var(--fg) }
+
+.right { border-left: 1px solid var(--line); background: var(--chrome); display: flex; flex-direction: column; min-height: 0 }
+.ins { padding: 16px 18px 28px; display: grid; gap: 18px }
+.ins .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--fg-3) }
+.ins h2 { margin: 2px 0 0; font-size: 18px; line-height: 1.35; text-wrap: balance }
+.ins h2 b { font-family: var(--mono); color: var(--fg-3); font-weight: 600; font-size: 14px; margin-right: 6px }
+.ins p { margin: 6px 0 0; color: var(--fg-2) }
+.ins h5 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--fg-2); display: flex; justify-content: space-between }
+.ins h5 span { font-family: var(--mono); color: var(--fg-3); font-weight: 500 }
+.ins ul { margin: 0; padding-left: 18px; display: grid; gap: 3px }
+.row2 { display: flex; gap: 6px; flex-wrap: wrap }
+.fl { display: grid; gap: 4px }
+.fl div { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; align-items: baseline }
+.fl b { font-family: var(--mono); font-size: 11px; color: var(--accent) }
+.fl small { display: block; color: var(--fg-3); font-size: 11px }
+.link { width: 100%; display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; text-align: left; background: var(--chrome-2) }
+.link + .link { margin-top: 4px }
+.link:hover { box-shadow: inset 0 0 0 1px var(--accent) }
+.link .ar { color: var(--accent); font-weight: 700; flex: none } .link.back .ar { color: var(--fg-3) }
+.link .lb { flex: 1; min-width: 0 }
+.link .lb small { display: block; color: var(--fg-3); font-size: 11px }
+.link .id { font-family: var(--mono); font-size: 11px; color: var(--fg-3); flex: none }
+.uxcard { padding: 10px 12px; border-radius: 10px; background: var(--chrome-2); display: grid; gap: 5px }
+.uxcard .tt { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-weight: 700 }
+.uxcard .src { color: var(--fg-3); font-size: 11px }
+.uxcard .fx { color: var(--fg-2) }
+.uxcard .fx::before { content: "보완 · "; font-weight: 700; color: var(--fg) }
+.uxcard .rest { color: var(--mid); font-size: 12px }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px }
+.stat { padding: 10px; border-radius: 10px; background: var(--chrome-2) }
+.stat b { display: block; font-size: 20px; font-variant-numeric: tabular-nums }
+.stat span { color: var(--fg-3); font-size: 11px }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 5px 12px; color: var(--fg-2) }
+.keys kbd { justify-self: start; white-space: nowrap }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap }
+.uxlist { display: grid; gap: 6px; padding: 10px }
+.uxlist button { text-align: left; padding: 10px 12px; border-radius: 10px; background: var(--chrome-2); display: grid; gap: 4px }
+.uxlist button:hover { box-shadow: inset 0 0 0 1px var(--accent) }
+.uxlist .meta { display: flex; gap: 6px; align-items: center; color: var(--fg-3); font-size: 11px; font-family: var(--mono) }
+.uxlist h4 { margin: 8px 2px 2px; font-size: 12px; color: var(--fg-2) }
+
+/* 프로토타입 */
+.proto { position: fixed; inset: 0; z-index: 50; background: rgba(8, 14, 11, .84); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.pbar { display: flex; align-items: center; gap: 8px; color: #E8EEEA; width: min(720px, 100%) }
+.pbar .tb { color: #C4CFC9 } .pbar .tb:hover { background: rgba(255, 255, 255, .1); color: #FFFFFF }
+.pbar .ttl { flex: 1; min-width: 0; text-align: center; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.pbar .ttl small { font-family: var(--mono); color: #87948D; margin-right: 6px }
+.pview { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 30px 80px rgba(0, 0, 0, .5) }
+.pview .pin-scr { position: absolute; left: 0; top: 0; transform-origin: 0 0 }
+.pview [data-go], .pview [data-nav] { cursor: pointer }
+.pview [data-go]:hover { outline: 3px solid rgba(79, 203, 164, .9); outline-offset: 2px }
+.pview.flash [data-go] { outline: 3px solid rgba(79, 203, 164, .9); outline-offset: 2px; background-color: rgba(79, 203, 164, .18) }
+.pfoot { color: #A5B2AB; font-size: 12px; text-align: center }
+.pfoot kbd { font-family: var(--mono); background: rgba(255, 255, 255, .1); padding: 1px 5px; border-radius: 4px; color: #E8EEEA }
+
+/* 문서 패널 */
+.docs { position: fixed; inset: 0; z-index: 60; background: var(--chrome); color: var(--fg); display: flex; flex-direction: column }
+.docs-top { display: flex; align-items: center; gap: 12px; min-height: 56px; border-bottom: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); flex-wrap: wrap }
+.docs-tt { display: flex; flex-direction: column; min-width: 0 } .docs-tt b { font-size: 15px } .docs-tt small { color: var(--fg-3); font-size: 12px }
+.docs-tabs { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; justify-content: center }
+.docs-tabs button { padding: 6px 10px; border-radius: 8px; color: var(--fg-2); font-weight: 600 }
+.docs-tabs button[aria-selected="true"] { background: var(--accent-soft); color: var(--accent) }
+.docs-body { overflow-y: auto; flex: 1; min-height: 0; padding-block: 24px 80px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.docs-body > section { max-width: 1180px; margin: 0 auto }
+.docs h2 { font-size: 22px; margin: 0 0 6px; text-wrap: balance }
+.docs .lead { color: var(--fg-2); max-width: 76ch; margin: 0 0 18px; line-height: 1.6 }
+.docs .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 24px }
+.docs table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 720px }
+.docs th, .docs td { text-align: left; padding: 8px 12px; border-top: 1px solid var(--line); vertical-align: top }
+.docs thead th { border-top: 0; color: var(--fg-3); font-size: 12px; background: var(--chrome-2); white-space: nowrap; position: sticky; top: 0 }
+.docs td.mono { font-family: var(--mono); font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums }
+.docs td.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap }
+.docs tr.new td { background: var(--accent-soft) }
+.docs tr.cond td { color: var(--fg-3) }
+.docs tr.tot td { font-weight: 700; background: var(--chrome-2) }
+.docs .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 20px }
+.docs .kpi { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 2px }
+.docs .kpi b { font-size: 24px; font-variant-numeric: tabular-nums } .docs .kpi span { color: var(--fg-3); font-size: 12px } .docs .kpi small { color: var(--fg-2); font-size: 12px }
+.bars { display: grid; gap: 6px; margin-bottom: 24px; max-width: 760px }
+.bars div { display: grid; grid-template-columns: 150px minmax(0, 1fr) 48px; gap: 10px; align-items: center; font-size: 12px }
+.bars i { display: block; height: 14px; border-radius: 3px; background: var(--accent) }
+.bars i.add { background: var(--mid) }
+.bars em { font-style: normal; font-family: var(--mono); text-align: right; color: var(--fg-2) }
+.bartrack { display: flex; gap: 2px; background: var(--chrome-2); border-radius: 3px }
+.legend { display: flex; gap: 14px; font-size: 12px; color: var(--fg-2); margin: -12px 0 18px } .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px }
+.filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px }
+.filter button { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--fg-2); font-size: 12px; font-weight: 600 }
+.filter button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft) }
+
+.only-narrow { display: none }
+@media (max-width: 1180px) { .app { grid-template-columns: 240px minmax(0, 1fr) 310px } }
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr) }
+  .left, .right { position: fixed; z-index: 30; top: 48px; bottom: 0; width: min(330px, 88vw); box-shadow: var(--shadow) }
+  .left { left: 0; transform: translateX(-102%); transition: transform .2s ease }
+  .right { right: 0; transform: translateX(102%); transition: transform .2s ease }
+  .app.show-left .left, .app.show-right .right { transform: none }
+  .only-narrow { display: inline-flex }
+  .wide-only { display: none !important }
+  .minimap { width: 130px; height: 100px }
+  .hint { display: none }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important } }
+
+/* 화면 시안 테마 — 배포 사이트에서 잰 값으로 바꾼다(색 · 글꼴 · 사이드바 · 카드 · 버튼 · 입력 · 배지 · 지도 오버레이).
+   클래스 이름(.scr .sb .nv .tp .ct .ph .c .ch .btn .inp .sel .lab .seg .tg .note .t .mapw …)은 엔진 · 검수가 쓰므로 유지한다. */
+.scr { width: 1440px; height: 900px; position: relative; background: #F9FAFB; color: #000000; font: 14px/1.5 "Overpass", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: 60px minmax(0, 1fr) 40px; overflow: hidden; text-align: left }
+.scr * { box-sizing: border-box }
+.scr .sb { grid-row: 1 / 4; background: #FFFFFF; box-shadow: 0 8px 10px 0 rgba(183, 192, 206, .2); z-index: 1; display: flex; flex-direction: column }
+.scr .sbh { height: 60px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F2F4F9 }
+.scr .logo { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 300; color: #2E9E6B; white-space: nowrap }
+.scr .logo i { width: 20px; height: 20px; border-radius: 5px; background: #1F6F4C }
+.scr .logo b { font-weight: 800; color: #1F6F4C }
+.scr .burger { width: 24px; display: grid; gap: 4px } .scr .burger i { height: 1.5px; background: #383838 }
+.scr .nav { padding: 20px 0 0; display: grid; gap: 0 }
+.scr .nv { position: relative; height: 32px; padding: 0 25px; display: flex; align-items: center; gap: 14px; color: #000000; white-space: nowrap }
+.scr .nv svg { width: 14px; height: 14px; flex: none; color: #000000 }
+.scr .nv.on { color: #2E9E6B } .scr .nv.on svg { color: #2E9E6B }
+.scr .nv.on::before { content: ""; position: absolute; left: 0; top: 3px; width: 3px; height: 26px; background: #2E9E6B }
+.scr .nv small { font-size: 10.5px; font-weight: 700; line-height: 1; padding: 5px 5px 3px; border-radius: 3px; background: #FFF4D9; color: #A06A00 }
+.scr .nv .chev { margin-left: auto; width: 7px; height: 7px; border-right: 1.5px solid #000; border-bottom: 1.5px solid #000; transform: rotate(45deg) translateY(-2px) }
+.scr .tp { display: flex; align-items: center; justify-content: flex-end; gap: 14px; padding: 0 25px; background: #FFFFFF; border-bottom: 1px solid #F2F4F9; box-shadow: 3px 0 10px 0 rgba(183, 192, 206, .2) }
+.scr .user { display: flex; align-items: center; gap: 14px; color: #535353; font-weight: 700; white-space: nowrap }
+.scr .user i { width: 30px; height: 30px; border-radius: 50%; background: #D6D9DE; box-shadow: inset 0 -8px 0 0 #C4C8CF }
+.scr .ftr { grid-column: 2; display: flex; align-items: center; padding: 0 25px; border-top: 1px solid #F2F4F9; font-size: 12px; color: #686868; background: #F9FAFB }
+.scr .ct { padding: 18px 25px 18px; display: flex; flex-direction: column; gap: 16px; min-height: 0; overflow: hidden }
+/* 브레드크럼 행: 사이트에는 페이지 제목이 없고 “홈 > 메뉴명”만 있다 */
+.scr .ph { display: flex; align-items: center; gap: 12px; min-height: 26px }
+.scr .crumb { font-size: 13px; color: #000000; white-space: nowrap } .scr .crumb a, .scr .crumb .h { color: #007BFF } .scr .crumb s { text-decoration: none; color: #6C757D; margin: 0 8px }
+.scr .ph .acts { margin-left: auto; display: flex; gap: 10px; align-items: center }
+.scr .c { background: #FFFFFF; border: 1px solid #F2F4F9; border-radius: 4px; box-shadow: 0 0 10px 0 rgba(183, 192, 206, .2); padding: 20px; min-width: 0 }
+.scr .ch { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; line-height: 1.2; margin-bottom: 14px; color: #000000 }
+.scr .ch .n { display: none }
+.scr .ch .r { margin-left: auto; display: flex; gap: 6px; align-items: center; font-weight: 400 }
+.scr .cnt { font-size: 12px; color: #8A929E; font-weight: 400 }
+.scr .btn { height: 31px; padding: 0 12px; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; font-weight: 600; font-size: 12.8px; border: 1px solid #2E9E6B; background: #FFFFFF; color: #2E9E6B; white-space: nowrap }
+.scr .btn svg { width: 13px; height: 13px }
+.scr .btn.pri { background: #2E9E6B; color: #FFFFFF }
+.scr .btn.sec { background: #7987A1; border-color: #7987A1; color: #FFFFFF }
+.scr .btn.ghost { border-color: transparent; padding: 0 4px }
+.scr .btn.sm { height: 26px; padding: 0 9px; font-size: 12px }
+.scr .btn.lg { height: 38px; font-size: 14px }
+.scr .btn.dis { opacity: .5 }
+.scr .btn.danger { color: #FF3366; border-color: #FF3366 }
+.scr .inp { height: 31px; border: 1px solid #E8EBF1; border-radius: 3.2px; padding: 0 12px; display: flex; align-items: center; background: #FFFFFF; color: #495057; font-size: 13px; white-space: nowrap; overflow: hidden }
+.scr .inp.ro { background: #F4F6F9 }
+.scr .inp.err { border-color: #FF3366 }
+.scr .inp .u { margin-left: auto; color: #8A929E; font-size: 12px; padding-left: 10px }
+.scr .inp.ph-t, .scr .ph-t { color: #B4BAC4 }
+.scr .sel { height: 30px; padding: 0 12px; border: 1px solid #E8EBF1; border-radius: 3.2px; display: flex; align-items: center; gap: 8px; background: #FFFFFF; color: #495057; font-size: 13px; white-space: nowrap }
+.scr .sel::after { content: ""; width: 6px; height: 6px; border-right: 1.5px solid #343A40; border-bottom: 1.5px solid #343A40; transform: rotate(45deg) translateY(-2px); margin-left: auto }
+.scr .lab { font-size: 12px; color: #5B6472; font-weight: 600; margin-bottom: 5px; line-height: 18px }
+.scr .lab em { font-style: normal; color: #FF3366 }
+.scr .msg, .scr .tiny { font-size: 11px; color: #8A929E; line-height: 16.5px }
+.scr .msg { margin-top: 4px } .scr .msg.err { color: #FF3366 } .scr .msg.wrn { color: #A06A00 }
+/* 가능/불가/미확인: 사이트의 토글 · 배지 모양을 쓴다 */
+.scr .seg { display: inline-flex; gap: 6px; flex-wrap: wrap }
+.scr .seg span { height: 30px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #5B6472; border: 1px solid #D5D9E0; border-radius: 4px; background: #FFFFFF; white-space: nowrap }
+.scr .seg span::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #C3C8D1 }
+.scr .seg span.on { background: #E8EFFF; border-color: #3D6FD6; color: #1346A6 } .scr .seg span.on::before { background: #3D6FD6 }
+.scr .seg span.on.q { background: #F4F6F9; border-color: #7987A1; color: #35404F } .scr .seg span.on.q::before { background: #7987A1 }
+.scr .tg { display: inline-flex; align-items: center; height: 19.5px; padding: 3px 5px 1px; border-radius: 3px; font-size: 10.5px; font-weight: 700; line-height: 1; white-space: nowrap }
+.scr .t-ok { background: #E1F5EC; color: #0E8A5A } .scr .t-wr { background: #FFF4D9; color: #A06A00 } .scr .t-bad { background: #FFE5EC; color: #E0204F } .scr .t-mu { background: #E9ECEF; color: #212529 } .scr .t-in { background: #E8EFFF; color: #1346A6 }
+.scr .t-ops { background: #7987A1; color: #FFFFFF } .scr .t-demo { background: #FFF4D9; color: #A06A00 } .scr .t-na { background: #E9ECEF; color: #5B6472 }
+.scr .note { position: relative; display: block; padding: 8px 10px 8px 26px; border-radius: 4px; font-size: 11.5px; line-height: 17.6px; background: #F4F6F9; color: #6B7482 }
+.scr .note::before { content: "i"; position: absolute; left: 9px; top: 9px; width: 12px; height: 12px; border-radius: 50%; display: grid; place-items: center; font-size: 9px; font-weight: 800; background: #8A929E; color: #FFFFFF }
+.scr .note.w { background: #FFF8E6; color: #8A5C00 } .scr .note.w::before { content: "!"; background: #D69A00 }
+.scr .note.e { background: #FFEEF2; color: #C0163F } .scr .note.e::before { content: "!"; background: #FF3366 }
+.scr .note.g { background: #E9F7F0; color: #0E7A50 } .scr .note.g::before { content: "✓"; background: #10B759 }
+.scr .note.i { background: #F4F6F9; color: #6B7482 }
+.scr table.t { width: 100%; border-collapse: collapse; font-size: 13px; color: #212529 }
+.scr table.t th { text-align: left; font-size: 13px; color: #000000; font-weight: 700; padding: 10px 12px; border-bottom: 1px solid #E8EBF1; white-space: nowrap }
+.scr table.t td { padding: 10px 12px; border-bottom: 1px solid #E8EBF1; white-space: nowrap }
+.scr table.t tr:last-child td { border-bottom: 0 }
+.scr table.t.tight td { padding: 6px 8px }
+.scr table.t.wrap td { white-space: normal } .scr table.t.wrap td .btn, .scr table.t.wrap td .tg { white-space: nowrap } .scr table.t.wrap td:first-child { white-space: nowrap }
+.scr table.t tr.on td { background: #F3F4FE }
+.scr table.t td.r, .scr table.t th.r { text-align: right; font-variant-numeric: tabular-nums }
+/* 현황 카드: 기존 홈 카드(라벨 · 파란 큰 값 · 보조 문구), 아이콘 없음 */
+.scr .kpi { display: block; padding: 20px 24px }
+.scr .kpi .ic { display: none }
+.scr .kpi .k { font-size: 14px; font-weight: 600; color: #000000; display: flex; gap: 6px; align-items: center }
+.scr .kpi .v { font-size: 28px; font-weight: 600; line-height: 36px; color: #2E9E6B; margin: 2px 0 2px; font-variant-numeric: tabular-nums }
+.scr .kpi .s { font-size: 13px; color: #686868 }
+.scr .stp { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #8A929E; white-space: nowrap }
+.scr .stp b { width: 18px; height: 18px; border-radius: 50%; border: 1px solid #C3C8D1; color: #8A929E; display: grid; place-items: center; font-size: 10.5px; font-weight: 700 }
+.scr .stp .on { color: #2E9E6B; font-weight: 600 } .scr .stp .on b { background: #2E9E6B; border-color: #2E9E6B; color: #FFFFFF }
+.scr .stp .done { color: #5B6472 } .scr .stp .done b { border-color: #7987A1; color: #7987A1 }
+.scr .stp i { width: 14px; height: 1px; background: #C3C8D1 }
+.scr .stp em { font-style: normal; font-size: 10.5px }
+.scr .tabsx { display: flex; gap: 2px; border-bottom: 1px solid #E8EBF1 }
+.scr .tabsx span { padding: 8px 16px; font-size: 13px; color: #5B6472; border: 1px solid transparent; border-radius: 4px 4px 0 0; margin-bottom: -1px }
+.scr .tabsx span.on { color: #2E9E6B; font-weight: 600; background: #FFFFFF; border-color: #E8EBF1 #E8EBF1 #FFFFFF }
+/* 지도: 카카오 지도 톤(연한 지형 · 노란 도로 · 하늘색 하천) + 사이트의 오버레이 박스 */
+.scr .mapw { position: relative; border-radius: 0; overflow: hidden; background: #EEF1EC }
+.scr .mapw svg.map { position: absolute; inset: 0; width: 100%; height: 100% }
+.scr .zoom { position: absolute; right: 8px; top: 8px; width: 28px; background: #FFFFFF; border: 1px solid #D5D9E0; border-radius: 3px; display: grid; justify-items: center; font-size: 16px; color: #333333; box-shadow: 0 1px 2px rgba(0, 0, 0, .12) }
+.scr .zoom span { height: 26px; line-height: 26px } .scr .zoom i { width: 3px; height: 62px; background: #E0E0E0; position: relative; margin: 2px 0 } .scr .zoom i::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 42px; background: #3396FF } .scr .zoom i::before { content: ""; position: absolute; left: -6px; top: 14px; width: 15px; height: 6px; background: #3396FF; border-radius: 2px; z-index: 1 }
+.scr .scale { position: absolute; left: 8px; bottom: 6px; display: flex; align-items: flex-end; gap: 4px; font: 700 10px/1 "Overpass", sans-serif; color: #333333 } .scr .scale i { width: 46px; height: 5px; border: 1.5px solid #333333; border-top: 0 } .scr .scale b { font-size: 11px; letter-spacing: -.02em }
+.scr .lyr { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px }
+.scr .lyr span { height: 28px; padding: 0 9px; border-radius: 4px; background: #E8EFFF; border: 1px solid #3D6FD6; color: #1346A6; display: inline-flex; align-items: center; gap: 6px; font-size: 12px }
+.scr .lyr span::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #3D6FD6 }
+.scr .lyr span.no { background: #FFFFFF; border-color: #D5D9E0; color: #5B6472 } .scr .lyr span.no::before { background: #C3C8D1 }
+.scr .lgd, .scr .ibox { position: absolute; background: rgba(255, 255, 255, .95); border: 1px solid #DFE3E8; border-radius: 6px; box-shadow: 0 2px 10px 0 rgba(28, 46, 74, .12); padding: 10px 12px; font-size: 11px; line-height: 16.5px; color: #35404F; display: grid; gap: 4px }
+.scr .lgd { right: 10px; bottom: 10px } .scr .ibox { left: 10px; top: 10px; min-width: 150px }
+.scr .lgd b, .scr .ibox b { font-weight: 700 }
+.scr .lgd div, .scr .ibox div { display: flex; gap: 6px; align-items: center }
+.scr .ibox div span:first-child { color: #8A929E; width: 56px }
+.scr .lgd i { width: 16px; height: 10px; border-radius: 2px; flex: none }
+.scr .mtag { position: absolute; left: 92px; bottom: 5px; font-size: 10px; color: #6B7482 }
+.scr .row { display: flex; gap: 20px; min-height: 0 }
+.scr .g { display: grid; gap: 20px; min-height: 0 }
+.scr .fr { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 8px 10px; align-items: center }
+.scr .fr > .lab { margin: 0 }
+.scr .fr { gap: 5px 10px } .scr .fr .seg span { height: 24px } .scr .fr .inp, .scr .fr .sel { height: 26px }
+.scr .ck { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #212529 }
+.scr .ck i { width: 15px; height: 15px; border-radius: 2px; border: 1px solid #ADB5BD; background: #FFFFFF; flex: none; display: grid; place-items: center; font-style: normal; font-size: 10px; color: #FFFFFF }
+.scr .ck i.on { background: #2E9E6B; border-color: #2E9E6B } .scr .ck i.on::after { content: "✓" }
+.scr .ck i.lock { background: #E9ECEF }
+.scr .ck.dis { color: #ADB5BD }
+/* 목록: 사이트의 목록 항목 패턴 */
+.scr .li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-bottom: 1px solid #EEF1F5; border-left: 3px solid transparent; background: #FFFFFF }
+.scr .li.on { border-left-color: #2E9E6B; background: #F3F4FE }
+.scr .li .tt { font-weight: 600; font-size: 13px; color: #35404F } .scr .li .sub { font-size: 11px; color: #8A929E }
+.scr .lbox { border: 1px solid #E8EBF1; border-radius: 3px; overflow: hidden }
+.scr .lbox .li:last-child { border-bottom: 0 }
+.scr .shade { position: absolute; inset: 0; background: rgba(0, 0, 0, .4); z-index: 5 }
+.scr .modal { position: absolute; z-index: 6; background: #FFFFFF; border-radius: 4px; box-shadow: 0 6px 30px rgba(0, 0, 0, .25); padding: 0; display: flex; flex-direction: column }
+.scr .modal h3 { margin: 0; padding: 16px 20px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #E8EBF1 }
+.scr .modal .mb { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0 }
+.scr .modal .x { margin-left: auto; width: 24px; height: 24px; display: grid; place-items: center; color: #6C757D; font-size: 16px; font-weight: 400 }
+.scr .modal .foot { display: flex; gap: 8px; justify-content: flex-end; align-items: center; padding: 12px 20px; border-top: 1px solid #E8EBF1 }
+.scr .dimmed { position: absolute; inset: 0 }
+.scr .mono { font-family: "Overpass Mono", "Overpass", ui-monospace, monospace; font-size: 12px }
+.scr .toast { position: absolute; z-index: 7; right: 25px; top: 76px; background: #FFFFFF; color: #212529; border-radius: 4px; padding: 12px 16px; font-size: 13px; display: flex; gap: 10px; align-items: center; box-shadow: 0 0 10px rgba(0, 0, 0, .2); border-left: 4px solid #10B759 }
+.scr .toast b { color: #000000 }
+.scr .demo { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #A06A00 }
+
+[hidden] { display: none !important }
+/* ===== 화면설계서(SB) 보기: 관리자 SB 형식 — 머리줄 · 화면(번호 마커) · Description 표 · 상태 예시 · 흐름 ===== */
+.mode { display: flex; gap: 2px; padding: 3px; border-radius: 9px; background: var(--chrome-2); margin-left: 10px; flex: none }
+.mode button { height: 26px; padding: 0 12px; border-radius: 7px; font-weight: 600; color: var(--fg-2); white-space: nowrap }
+.mode button[aria-selected="true"] { background: var(--chrome); color: var(--fg); box-shadow: 0 1px 2px rgba(0, 0, 0, .12) }
+.sbv { display: none; grid-column: 1 / -1; grid-row: 2; min-height: 0; grid-template-columns: 250px minmax(0, 1fr); background: var(--canvas) }
+.app.mode-sb .sbv { display: grid }
+.app.mode-sb .left, .app.mode-sb .stage, .app.mode-sb .right, .app.mode-sb .map-only { display: none !important }
+.sbx { border-right: 1px solid var(--line); background: var(--chrome); overflow-y: auto; padding: 8px 6px 16px }
+.sbx h4 { margin: 10px 8px 4px; font-size: 11.5px; font-weight: 700; color: var(--fg-3); letter-spacing: .02em }
+.sbx button { width: 100%; display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 6px; align-items: baseline; padding: 6px 8px; border-radius: 7px; text-align: left }
+.sbx button:hover { background: var(--chrome-2) }
+.sbx button[aria-current="true"] { background: var(--accent-soft) }
+.sbx button span:first-child { font-family: var(--mono); font-size: 11px; color: var(--fg-3) }
+.sbx button span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.sbx button small { grid-column: 2; font-size: 11px; color: var(--fg-3); margin-top: -3px }
+.sbmain { overflow: auto; min-width: 0; padding: 20px 24px 40px }
+.sbnav { display: flex; align-items: center; gap: 8px; max-width: 1640px; margin: 0 auto 12px }
+.sbnav .t { flex: 1; min-width: 0; font-size: 12px; color: var(--fg-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.sbnav .tb { border: 1px solid var(--line); background: var(--chrome) }
+
+/* 용지: 문서이므로 테마와 무관하게 흰 바탕 */
+.sheet { max-width: 1640px; margin: 0 auto; background: #FFFFFF; color: #1E1E1E; border-radius: 6px; box-shadow: var(--shadow); padding: 22px 26px 26px; font: 13px/1.55 "IBM Plex Sans KR", "Malgun Gothic", sans-serif }
+.sh-top { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid #1E1E1E; padding-bottom: 10px; margin-bottom: 16px; flex-wrap: wrap }
+.sh-top h1 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.01em }
+.sh-top .path { font-size: 19px; color: #8A8A8A; font-weight: 500 }
+.sh-top .meta { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; align-items: center }
+.sh-chip { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 4px; background: #F1F1F1; color: #444; font-size: 11.5px; font-weight: 600; white-space: nowrap }
+.sh-chip.new { background: #FFECEC; color: #C81E1E } .sh-chip.old { background: #E9EEF7; color: #34507A } .sh-chip.cond { background: #FFF4D9; color: #8A5A00 }
+.sh-chip.mono { font-family: var(--mono); font-weight: 500 }
+.sh-purpose { margin: -4px 0 14px; color: #444; font-size: 13px }
+.sh-body { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 22px; align-items: start }
+@media (max-width: 1180px) { .sh-body { grid-template-columns: minmax(0, 1fr) } }
+
+.sb-shot { position: relative; border: 1px solid #D9D9D9; overflow: hidden; background: #F9FAFB }
+.sb-scale { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; transform-origin: 0 0 }
+.sb-ov { position: absolute; inset: 0; pointer-events: none; z-index: 20 }
+.sbm-box { position: absolute; border: 3px solid #E5252A; border-radius: 4px; transition: background-color .12s }
+.sbm-n { position: absolute; border-radius: 50%; background: #E5252A; color: #FFFFFF; display: grid; place-items: center; font-weight: 800; font-family: "IBM Plex Sans KR", sans-serif; box-shadow: 0 0 0 3px #FFFFFF; pointer-events: auto; cursor: pointer; line-height: 1 }
+.sbm-l { position: absolute; background: #E5252A }
+.sbm.hi .sbm-box { background: rgba(229, 37, 42, .1); border-width: 4px }
+.sbm.hi .sbm-n { background: #B5121B }
+.sbm.dim { opacity: .28 }
+
+/* Description 표 */
+.desc { border: 1.5px solid #555; font-size: 12.5px; line-height: 1.5; background: #FFFFFF }
+.desc > .dh { background: #6E6E6E; color: #FFFFFF; font-weight: 700; padding: 4px 10px; font-size: 13px }
+.dr { border-top: 1.5px solid #555; padding: 8px 10px 9px; transition: background-color .12s }
+.dr.hi { background: #FFF3F3 }
+.dr .dt { font-weight: 700; display: flex; gap: 6px; align-items: baseline; cursor: default }
+.dr .dt b { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #E5252A; color: #FFFFFF; font-size: 11px; flex: none }
+.dr ul { margin: 4px 0 0; padding: 0 0 0 16px }
+.dr li { margin: 1px 0 }
+.dr li.l2 { list-style: "– "; margin-left: 14px; color: #3A3A3A }
+.dr .lb { font-weight: 700; margin: 6px 0 1px; color: #1E1E1E; font-size: 12px }
+.dr q { quotes: "“" "”"; color: #0B5CAD; font-weight: 500 }
+.dr q::before { content: open-quote } .dr q::after { content: close-quote }
+.tk { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: 3px; font-size: 10.5px; font-weight: 700; margin: 0 3px 0 0; vertical-align: 1px; white-space: nowrap }
+.tk.save { background: #E3F4EA; color: #146C3C } .tk.srv { background: #E8EFFF; color: #1346A6 } .tk.old { background: #EEF0F3; color: #4A5565 }
+.tk.cond { background: #FFF4D9; color: #8A5A00 } .tk.ex { background: #FFECEC; color: #B5121B; cursor: help } .tk.go { background: #1E1E1E; color: #FFFFFF; cursor: pointer }
+.tk.go:hover { background: #E5252A }
+
+/* 상태 예시(번호-하위번호) */
+.subs { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 14px }
+.sub { position: relative; flex: 1 1 280px; max-width: 460px; padding-top: 6px }
+.sub > .sn { position: absolute; left: -6px; top: -6px; z-index: 2; min-width: 34px; height: 34px; padding: 0 6px; border-radius: 17px; background: #E5252A; color: #FFFFFF; font-weight: 800; display: grid; place-items: center; font-size: 13px; box-shadow: 0 0 0 3px #FFFFFF }
+.sub > .scap { font-size: 12px; color: #555; margin: 0 0 6px 36px; font-weight: 600 }
+.sw { border: 1px solid #DDD; border-radius: 6px; box-shadow: 0 4px 16px rgba(0, 0, 0, .14); background: #FFFFFF; padding: 22px 20px 16px; text-align: center; font: 14px/1.5 "Overpass", "Malgun Gothic", sans-serif; color: #545454 }
+.sw h5 { margin: 0 0 6px; font-size: 17px; color: #595959; font-weight: 600 }
+.sw .bt { display: flex; gap: 6px; justify-content: center; margin-top: 14px }
+.sw .bt span, .fx .bt span { height: 31px; padding: 0 14px; border-radius: 3px; display: inline-flex; align-items: center; font-size: 12.8px; font-weight: 600; color: #FFFFFF; background: #727CF5 }
+.sw .bt span.s, .fx .bt span.s { background: #7987A1 } .sw .bt span.d { background: #FF3366 }
+.fx { border: 1px dashed #C9C9C9; border-radius: 6px; background: #FFFFFF; padding: 12px 14px; font: 13px/1.5 "Overpass", "Malgun Gothic", sans-serif; color: #000 }
+.fx .lab { font-size: 12px; font-weight: 600; color: #5B6472; margin-bottom: 4px } .fx .lab em { color: #FF3366; font-style: normal }
+.fx .in { height: 31px; border: 1px solid #E8EBF1; border-radius: 3.2px; padding: 0 10px; display: flex; align-items: center; font-size: 12.8px }
+.fx .in.err { border-color: #FF3366 } .fx .in.ph { color: #8A929E }
+.fx .m { font-size: 11px; color: #8A929E; margin-top: 3px } .fx .m.err { color: #FF3366 } .fx .m.wrn { color: #A06A00 }
+.fx .tst { display: flex; gap: 10px; align-items: center; border-left: 4px solid #10B759; box-shadow: 0 0 10px rgba(0, 0, 0, .18); border-radius: 4px; padding: 10px 14px; font-size: 13px }
+
+/* 판정표 */
+.mx { margin: 0 0 18px }
+.mx h3 { margin: 0 0 8px; font-size: 15px; display: flex; align-items: center; gap: 8px }
+.mx h3 b { display: inline-grid; place-items: center; min-width: 26px; height: 26px; border-radius: 13px; background: #E5252A; color: #FFF; font-size: 12px; padding: 0 6px }
+.mxt { width: 100%; border-collapse: collapse; font-size: 12.5px }
+.mxt th, .mxt td { border: 1.5px solid #555; padding: 6px 8px; text-align: center; vertical-align: middle }
+.mxt th { background: #EFEFEF; font-weight: 700 }
+.mxt td.l { text-align: left }
+.mxt td.o { font-weight: 700 } .mxt td.x { color: #8A8A8A }
+.mx .nt { font-size: 12px; color: #555; margin: 6px 0 0 }
+.wrapx { overflow-x: auto }
+
+/* 흐름 · 맥락 */
+.ctx { margin-top: 16px; border: 1.5px solid #555; display: grid; grid-template-columns: 120px minmax(0, 1fr); font-size: 12.5px }
+.ctx > div { padding: 7px 10px; border-top: 1px solid #CFCFCF }
+.ctx > div:nth-child(-n+2) { border-top: 0 }
+.ctx > div:nth-child(odd) { background: #EFEFEF; font-weight: 700 }
+.ctx .ar { color: #999; margin: 0 4px }
+
+/* 문서 페이지 */
+.dp h2 { font-size: 17px; margin: 22px 0 8px; padding-left: 10px; border-left: 4px solid #E5252A }
+.dp h2:first-child { margin-top: 0 }
+.dp p { margin: 4px 0 8px; color: #333 }
+.dp .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px }
+.dp .bx { border: 1.5px solid #555; padding: 10px 14px }
+.dp .bx h3 { margin: 0 0 6px; font-size: 14px }
+.dp ol, .dp ul { margin: 4px 0; padding-left: 20px } .dp li { margin: 3px 0 }
+.dp .cover { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 26px; align-items: start }
+@media (max-width: 1000px) { .dp .cover { grid-template-columns: 1fr } }
+.dp .ttl { font-size: 30px; font-weight: 800; line-height: 1.25; margin: 4px 0 10px; letter-spacing: -.01em }
+.chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin: 8px 0 4px }
+.chain .nd { border: 1.5px solid #1E1E1E; border-radius: 6px; padding: 7px 10px; background: #FFF; min-width: 120px; max-width: 220px }
+.chain .nd b { display: block; font-size: 13px }
+.chain .nd small { display: block; color: #555; font-size: 11.5px; line-height: 1.4 }
+.chain .nd .tk { margin-top: 4px }
+.chain .ed { display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 92px; max-width: 150px; padding: 0 4px; text-align: center; font-size: 11px; color: #B5121B; font-weight: 600; line-height: 1.35 }
+.chain .ed::after { content: ""; display: block; width: 100%; height: 2px; background: #E5252A; margin-top: 3px; clip-path: none; position: relative }
+.chain .ed i { font-style: normal; color: #E5252A; font-size: 15px; line-height: 1 }
+.lane { display: grid; grid-template-columns: 150px minmax(0, 1fr); border-top: 1px solid #DDD; padding: 8px 0; gap: 12px; align-items: center }
+.lane > b { font-size: 13px } .lane > b small { display: block; color: #777; font-weight: 500; font-size: 11px }
+.lane .nds { display: flex; flex-wrap: wrap; gap: 8px }
+.lane .nds button { border: 1.5px solid #1E1E1E; border-radius: 6px; padding: 5px 10px; background: #FFF; color: #1E1E1E; font-size: 12.5px; text-align: left }
+.lane .nds button:hover { border-color: #E5252A; color: #B5121B }
+.lane .nds button span { font-family: var(--mono); font-size: 11px; color: #888; margin-right: 6px }
+.rt { color: #B5121B; font-weight: 700 }
+
+</style>
+
+<div class="app show-hs" id="app">
+  <header class="top">
+    <button class="tb only-narrow" id="btnLeft" aria-label="화면 목록 열기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <div class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M2 19l6.5-10 4 6 3-4.5L22 19z"/><path d="M5.5 19c2-2.6 4.6-3.6 7-3.2" opacity=".55"/></svg>푸른숲공원 예약 관리 플로우 맵<small class="wide-only">가상 예시 · 추가개발 v1.1 · 화면 · 연결 · 기능정의 · 검토 이슈</small></div>
+    <span class="spacer"></span>
+    <div class="layers wide-only" role="group" aria-label="보기 레이어">
+      <button class="tb" data-layer="edges" aria-pressed="true">연결선</button>
+      <span class="emode" id="edgeMode" role="group" aria-label="연결선 보기 방식"><button data-em="route" aria-pressed="true" title="화면 사이 통로로 돌아가는 직각 연결선">우회</button><button data-em="front" aria-pressed="false" title="곡선을 화면 위에 그림">화면 앞</button><button data-em="back" aria-pressed="false" title="곡선을 화면 뒤에 그림">화면 뒤</button></span>
+      <button class="tb" data-layer="hs" aria-pressed="true">핫스팟</button>
+      <button class="tb" data-layer="spec" aria-pressed="true">기능정의</button>
+      <button class="tb" data-layer="ux" aria-pressed="true">검토 이슈</button>
+    </div>
+    <span class="sep wide-only"></span>
+    <button class="tb wide-only" id="zoomOut" aria-label="축소"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+    <button class="tb zoomval wide-only" id="zoomVal" aria-label="100%로 보기">100%</button>
+    <button class="tb wide-only" id="zoomIn" aria-label="확대"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="tb" id="fitAll" aria-label="전체 보기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span class="wide-only">전체</span></button>
+    <button class="tb" id="openDocs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg><span class="wide-only">문서</span></button>
+    <button class="tb primary" id="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5l12 7-12 7z"/></svg><span class="wide-only">프로토타입</span></button>
+    <button class="tb only-narrow" id="btnRight" aria-label="상세 열기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></button>
+  </header>
+
+  <aside class="left" aria-label="화면 목록">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabScreens" aria-selected="true">화면</button>
+      <button class="tab" role="tab" id="tabUx" aria-selected="false">검토 이슈</button>
+    </div>
+    <div class="scroll" id="leftScroll"></div>
+  </aside>
+
+  <main class="stage" id="stage" aria-label="플로우 캔버스. 드래그로 이동, 휠·핀치로 확대">
+    <div class="grid" id="grid"></div>
+    <div class="world" id="world"></div>
+    <div class="minimap" id="minimap" aria-label="미니맵, 눌러서 이동"><canvas id="mm"></canvas></div>
+    <div class="hint">드래그 이동 · <kbd>Ctrl</kbd>+휠·핀치 확대 · <kbd>1</kbd> 전체 · <kbd>2</kbd> 선택 · <kbd>P</kbd> 프로토타입 · <kbd>D</kbd> 문서</div>
+  </main>
+
+  <aside class="right" aria-label="상세"><div class="scroll"><div class="ins" id="ins"></div></div></aside>
+</div>
+
+<div class="proto" id="proto" hidden role="dialog" aria-modal="true" aria-label="프로토타입">
+  <div class="pbar">
+    <button class="tb" id="pBack" aria-label="이전 화면"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="tb" id="pRestart" aria-label="처음부터"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6h6"/><path d="M5.5 15a7 7 0 1 0 1.6-7.3L4 10"/></svg></button>
+    <div class="ttl" id="pTitle"></div>
+    <button class="tb" id="pShow">캔버스에서 보기</button>
+    <button class="tb" id="pClose" aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="pview" id="pView"></div>
+  <div class="pfoot">초록 테두리 영역이나 왼쪽 메뉴를 눌러 이동 · 빈 곳을 누르면 누를 수 있는 곳이 깜빡여요 · <kbd>←</kbd> 이전 · <kbd>Esc</kbd> 닫기</div>
+</div>
+
+<div class="docs" id="docs" hidden role="dialog" aria-modal="true" aria-labelledby="docsTitle">
+  <header class="docs-top">
+    <div class="docs-tt"><b id="docsTitle">추가개발 문서 v1.1</b><small>docs/*.md에서 생성</small></div>
+    <nav class="docs-tabs" id="docsTabs" aria-label="문서 구분"></nav>
+    <button class="tb" id="docsClose" aria-label="문서 닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </header>
+  <div class="docs-body" id="docsBody"></div>
+</div>
+
+<script type="application/json" id="docdata">{"features": [{"id": "COM-01", "name": "메뉴 · 화면 공통 틀", "impl": "U", "desc": "기존 관리자 틀과 같은 사이드 메뉴 · 브레드크럼", "group": "공통"}, {"id": "DASH-01", "name": "현황 카드 · 승인 대기", "impl": "U", "desc": "카드 수치가 예약 목록 수와 일치", "group": "대시보드"}, {"id": "DASH-02", "name": "시설 위치 지도", "impl": "U", "desc": "운영 · 점검 중 시설이 색으로 구분", "group": "대시보드"}, {"id": "FAC-01", "name": "시설 목록 · 지도", "impl": "U", "desc": "검색 · 상태 표시 · 수정 진입", "group": "시설 관리"}, {"id": "FAC-02", "name": "시설 등록 · 수정", "impl": "U", "desc": "필수 항목 검증 후 기존 시설 API로 저장", "group": "시설 관리"}, {"id": "FAC-03", "name": "위치 지도 선택", "impl": "U", "desc": "좌표 직접 입력 없이 지도 클릭으로만 저장", "group": "시설 관리"}, {"id": "BOOK-01", "name": "예약 목록 · 상태 탭", "impl": "U", "desc": "기본 탭 승인 대기, 검색", "group": "예약 관리"}, {"id": "BOOK-02", "name": "예약 승인 · 반려", "impl": "U", "desc": "반려 사유 필수, 이미 처리된 예약 재처리 차단", "group": "예약 관리"}], "wbs": [{"id": "1.1", "task": "기존 소스 · 화면 점검", "feat": "전체", "out": "화면 · 기능 매핑표", "dep": "-", "role": "개발", "days": "0.5"}, {"id": "2.1", "task": "공통 메뉴 · 레이아웃", "feat": "COM-01", "out": "신규 메뉴 · 브레드크럼", "dep": "1.1", "role": "프런트", "days": "0.5"}, {"id": "3.1", "task": "대시보드 카드 · 지도", "feat": "DASH-01~02", "out": "카드 · 지도 · 대기 목록", "dep": "2.1", "role": "프런트", "days": "1.0"}, {"id": "4.1", "task": "시설 목록 · 지도", "feat": "FAC-01", "out": "검색 · 목록 · 지도", "dep": "2.1", "role": "프런트", "days": "1.0"}, {"id": "4.2", "task": "시설 등록 · 위치 선택", "feat": "FAC-02~03", "out": "폼 검증 · 지도 선택 · 저장", "dep": "4.1", "role": "프런트", "days": "1.5"}, {"id": "5.1", "task": "예약 목록 · 상세", "feat": "BOOK-01~02", "out": "상태 탭 · 승인 · 반려", "dep": "2.1", "role": "프런트", "days": "1.5"}, {"id": "5.2", "task": "상태 버전 확인", "feat": "BOOK-02", "out": "409 응답 처리", "dep": "5.1", "role": "백엔드", "days": "(0.5)"}, {"id": "6.1", "task": "검수", "feat": "전체", "out": "AT-01~04 통과", "dep": "3.1 · 4.2 · 5.1", "role": "QA", "days": "1.0"}], "ex": [{"id": "EX-01", "sit": "지도 SDK 로드 실패", "how": "지도 자리에 안내, 목록은 그대로 사용", "pri": "P1"}, {"id": "EX-02", "sit": "수용 인원이 0 이하 · 숫자 아님", "how": "\"1 이상의 숫자를 입력하세요.\" 저장 차단", "pri": "P1"}, {"id": "EX-03", "sit": "위치를 고르지 않고 저장", "how": "\"지도에서 위치를 고르세요.\" 저장 차단", "pri": "P0"}, {"id": "EX-04", "sit": "반려 사유 공백으로 반려", "how": "\"반려 사유를 입력하세요.\" 반려 차단", "pri": "P0"}, {"id": "EX-05", "sit": "다른 관리자가 먼저 처리한 예약", "how": "\"이미 처리된 예약입니다.\" 목록 새로고침", "pri": "P0"}, {"id": "EX-06", "sit": "검색 결과 없음", "how": "\"검색 결과가 없습니다.\"", "pri": "P2"}, {"id": "EX-07", "sit": "같은 시설명이 이미 있음", "how": "\"같은 이름의 시설이 있습니다.\" 저장 차단", "pri": "P1"}], "at": [{"id": "AT-01", "feat": "DASH-01~02", "how": "카드 수치와 목록 수 비교, 지도 차단 시 목록 유지", "ex": "01", "pri": "P0"}, {"id": "AT-02", "feat": "FAC-01", "how": "시설 검색 · 결과 없음", "ex": "06", "pri": "P1"}, {"id": "AT-03", "feat": "FAC-02~03", "how": "필수 공백 · 0명 · 위치 미선택 · 중복 이름 저장 시도", "ex": "02,03,07", "pri": "P0"}, {"id": "AT-04", "feat": "BOOK-01~02", "how": "반려 사유 공백, 두 창에서 같은 예약 처리", "ex": "04,05,06", "pri": "P0"}], "rtm": [{"src": "요청서 1.1", "req": "관리자 메뉴 정리", "ids": "COM-01", "how": "U"}, {"src": "요청서 1.2", "req": "오늘 예약 · 승인 대기 현황", "ids": "DASH-01", "how": "U"}, {"src": "기획서 1쪽", "req": "시설 위치를 지도로 확인", "ids": "DASH-02", "how": "U"}, {"src": "요청서 2.1", "req": "시설 목록 · 검색", "ids": "FAC-01", "how": "U"}, {"src": "요청서 2.2", "req": "시설 등록 · 수정", "ids": "FAC-02", "how": "U"}, {"src": "기획서 3쪽", "req": "위치는 지도에서 선택", "ids": "FAC-03", "how": "U"}, {"src": "요청서 2.3", "req": "예약 목록 · 상태별 보기", "ids": "BOOK-01", "how": "U"}, {"src": "요청서 2.3", "req": "예약 승인 · 반려(사유)", "ids": "BOOK-02", "how": "U"}], "log": [{"ver": "1.0", "what": "최초 작성", "why": "요청서 · 기획서 · 기존 관리자 사이트 확인"}, {"ver": "1.1", "what": "위치 직접 입력 제거, 반려 사유 필수, 동시 처리 예외 추가", "why": "검토 RV-01~03"}], "risks": [{"id": "WR-01", "risk": "예약 API의 상태 확인 응답 미확인", "fix": "5.2를 조건부로 두고 착수 때 확인"}, {"id": "WR-02", "risk": "지도 SDK 키 사용량 한도", "fix": "개발 키 분리"}], "proc": [{"feat": "DASH-01", "input": "없음 (읽기)", "where": "서버 (기존 예약 조회)", "target": "reservation 수", "impact": "읽기만"}, {"feat": "FAC-02", "input": "시설 정보", "where": "서버 (기존 시설 API)", "target": "facility", "impact": "기존 테이블 쓰기"}, {"feat": "BOOK-02", "input": "승인 · 반려 · 사유", "where": "서버 (기존 예약 API)", "target": "reservation.status · reject_reason", "impact": "상태 컬럼만 변경"}], "fields": [{"scr": "F2", "label": "시설명", "key": "name", "type": "문자열", "req": "필수", "rule": "앞뒤 공백 제거 후 1~50자, 중복 불가", "def": "없음", "store": "facility.name"}, {"scr": "F2", "label": "유형", "key": "type", "type": "선택", "req": "필수", "rule": "캠핑 · 체육 · 실내 · 공연 · 야외", "def": "캠핑", "store": "facility.type"}, {"scr": "F2", "label": "수용 인원", "key": "capacity", "type": "정수", "req": "필수", "rule": "1~999", "def": "없음", "store": "facility.capacity"}, {"scr": "F2", "label": "이용 시간", "key": "hours", "type": "문자열", "req": "선택", "rule": "HH:MM ~ HH:MM", "def": "09:00 ~ 18:00", "store": "facility.hours"}, {"scr": "F2", "label": "운영 상태", "key": "status", "type": "선택", "req": "필수", "rule": "운영 · 점검 중", "def": "운영", "store": "facility.status"}, {"scr": "F2", "label": "안내 문구", "key": "notice", "type": "문자열", "req": "선택", "rule": "500자 이하", "def": "없음", "store": "facility.notice"}, {"scr": "F2", "label": "위치", "key": "lat · lng", "type": "좌표", "req": "필수", "rule": "지도 클릭으로만, 공원 경계 안", "def": "없음", "store": "facility.lat · lng"}, {"scr": "B2", "label": "반려 사유", "key": "reason", "type": "문자열", "req": "반려 시 필수", "rule": "1~200자", "def": "없음", "store": "reservation.reject_reason"}], "links": [{"name": "시설 API", "flow": "F2 저장", "path": "PUT /api/facilities/{id}", "state": "확인", "how": "재사용"}, {"name": "예약 API", "flow": "B2 처리", "path": "PATCH /api/reservations/{id}", "state": "확인, 상태 확인 응답은 미확인", "how": "재사용"}], "apis": [{"name": "BOOK-02", "path": "PATCH /api/reservations/{id}/status", "req": "status, reason, version", "res": "200 · 409", "rule": "version이 다르면 409"}], "tables": [{"name": "reservation (기존)", "cols": "reject_reason 추가", "keys": "기존 PK", "note": "컬럼 추가만"}], "srv": ["예약 상태 변경은 저장 직전 현재 상태를 다시 읽어 비교한다.", "반려 사유는 시민 알림 문구에 그대로 들어간다.", "공원 밖 클릭은 위치로 받지 않는다.", "선택 위치 핀은 다른 핀보다 위에 그린다."], "map": {"base": [{"k": "지도 종류", "v": "카카오 기본 지도(ROADMAP)", "n": "기존 SDK 재사용"}, {"k": "초기 범위", "v": "공원 경계 전체", "n": "경계 GeoJSON 기준"}, {"k": "확대 범위", "v": "레벨 2~6", "n": "공원 밖으로 이동 제한"}], "sym": [{"obj": "시설 (운영)", "kakao": "Marker(MarkerImage)", "shape": "물방울 핀 22×30 px", "style": "#2E9E6B", "z": "5", "act": "클릭 시 시설 수정"}, {"obj": "시설 (점검 중)", "kakao": "Marker(MarkerImage)", "shape": "물방울 핀 22×30 px", "style": "#9AA3AF", "z": "4", "act": "클릭 시 시설 수정"}, {"obj": "선택 위치", "kakao": "Marker(MarkerImage)", "shape": "물방울 핀 22×30 px", "style": "#E8554E", "z": "6", "act": "드래그로 이동"}, {"obj": "공원 경계", "kakao": "Polygon", "shape": "면", "style": "#D9EBCF · 선 #2E9E6B 1px", "z": "1", "act": "없음"}], "scr": [{"scr": "D1 대시보드", "show": "시설 전체", "toggle": "없음", "fit": "공원 경계", "click": "없음", "legend": "운영 · 점검 중", "empty": "SDK 실패 시 안내, 카드 유지"}, {"scr": "F1 시설 목록 · 지도", "show": "시설 전체", "toggle": "없음", "fit": "공원 경계", "click": "시설 → 수정", "legend": "운영 · 점검 중", "empty": "SDK 실패 시 목록만"}, {"scr": "F2 시설 등록 · 위치 선택", "show": "시설 · 선택 위치", "toggle": "없음", "fit": "공원 경계", "click": "지도 → 위치 선택", "legend": "없음", "empty": "SDK 실패 시 저장 차단"}], "rules": ["공원 밖 클릭은 위치로 받지 않는다.", "선택 위치 핀은 다른 핀보다 위에 그린다."]}, "wbsBase": 7.0}</script>
+<script>
+(() => {
+  const DOC = JSON.parse(document.getElementById('docdata').textContent);
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  const FEAT = {}; DOC.features.forEach((f) => { FEAT[f.id] = f; });
+  const EXM = {}; DOC.ex.forEach((x) => { EXM[x.id] = x; });
+  const ATM = {}; DOC.at.forEach((x) => { ATM[x.id] = x; });
+  // 상세명세 12장: 입력 필드 · 처리 위치를 화면 단위로 묶는다
+  const expandIds = (txt) => { const out = []; String(txt).replace(/([A-Z]{2,5})-(\d\d)(?:~(\d\d))?/g, (m, p, a, b) => { for (let i = +a; i <= +(b || a); i++) out.push(p + '-' + String(i).padStart(2, '0')); return m; }); return out; };
+  const fieldsFor = (id) => DOC.fields.filter((f) => f.scr === id || (SHARE[id] || []).indexOf(f.scr + ':' + f.key) >= 0);
+  const procFor = (s) => DOC.proc.filter((p) => expandIds(p.feat).some((f) => s.feat.indexOf(f) >= 0));
+  const whereChip = (w) => '<span class="chip ' + (/서버/.test(w) ? 'mid' : 'good') + '">' + esc(w) + '</span>';
+
+  // =====================================================================
+  // 가상 예시: 푸른숲 도시공원 시설 예약 관리 — 실제 기관 · 서비스와 관계없음
+  // 엔진 계약: PROJECT · SHARE · H · SCREENS · FLOWS · ISSUES
+  // =====================================================================
+  const PROJECT = {
+    title: '푸른숲공원 예약 관리 플로우 맵',
+    eyebrow: '푸른숲공원 예약 관리 · 추가개발 v1.1 (가상 예시)',
+    intro: '공원 시설(캠핑장 · 체육시설 · 회의실)을 지도에서 등록하고, 시민 예약을 승인 · 반려하는 관리자 화면 흐름입니다.',
+    start: 'D1',
+    issueStates: { done: 'v1.1 반영', ask: '반영 · 운영팀 확인' },
+    dataLead: '상세명세 12장. 시설 등록은 기존 시설 API로 저장하고, 예약 승인 · 반려는 기존 예약 테이블의 상태만 바꿉니다. 새 테이블은 만들지 않습니다.',
+    docs: { logTitle: 'v1.1 검토 보완', rtmLead: '요청서 · 기획서 요구 항목이 어느 기능 ID로 처리되는지 보여 줍니다.', atLead: '테스트 데이터로만 수행합니다. 실제 시민 예약은 승인 · 반려하지 않습니다.' },
+    overviewTop: (done) => '<div><h5>검토 결과 <span>' + done + '/' + ISSUES.length + ' 반영</span></h5><ul><li>시설 위치는 지도에서만 고르고 좌표를 직접 입력하지 않습니다.</li><li>반려 시 사유를 필수로 받습니다.</li><li>동시에 처리된 예약은 다시 승인하지 않습니다.</li><li>WBS 기준 ' + DOC.wbsBase.toFixed(1) + '인일.</li></ul></div>',
+    overviewBottom: '<div><h5>범위 원칙</h5><p style="margin:0">기존 예약 · 결제 흐름은 유지합니다. 신규는 관리자 화면과 상태 변경뿐이며 새 DB 테이블은 없습니다.</p></div>',
+    transData: { 'D1>B1': '상태 필터(승인 대기)', 'D1>B2': '예약 ID', 'D1>F1': '없음', 'F1>F2': '시설 ID (신규면 없음)', 'F2>F1': '저장한 시설 ID', 'B1>B2': '예약 ID', 'B2>B1': '처리 결과 · 목록 새로고침' }
+  };
+  const SHARE = {};
+
+  // ---------- 시안 도구 (배포 사이트 틀: 사이드바 · 상단 바 · 브레드크럼 · 카드) ----------
+  const I = { tree: '<path d="M12 3l6 8h-4l4 6H6l4-6H6z"/><path d="M12 17v4"/>', cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>', dash: '<rect x="3" y="3" width="8" height="10" rx="1" fill="currentColor" stroke="none"/><rect x="13" y="3" width="8" height="6" rx="1" fill="currentColor" stroke="none"/><rect x="3" y="15" width="8" height="6" rx="1" fill="currentColor" stroke="none"/><rect x="13" y="11" width="8" height="10" rx="1" fill="currentColor" stroke="none"/>', list: '<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>', cog: '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/>' };
+  const ic = (k) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (I[k] || '') + '</svg>';
+  // 사이드 메뉴: [키, 아이콘, 이름, 이동 화면ID, 신규 여부]
+  const NAV = [['dash', 'dash', '대시보드', 'D1', 0], ['fac', 'tree', '시설 관리', 'F1', 1], ['book', 'cal', '예약 관리', 'B1', 1], ['sys', 'cog', '시스템관리', '', 0]];
+  const BRAND = '푸른숲공원 <b>관리자</b>', USER = '운영팀 님', FOOTER = 'Copyright © Example Park Office. All Rights Reserved';
+  function shell(active, body, o) {
+    o = o || {};
+    const nav = NAV.map((n) => '<div class="nv' + (n[0] === active ? ' on' : '') + '"' + (n[3] ? ' data-nav="' + n[3] + '"' : '') + '>' + ic(n[1]) + n[2] + (n[4] ? '<small>신규</small>' : '') + '</div>').join('');
+    return '<div class="scr"><aside class="sb"><div class="sbh"><div class="logo"><i></i><span>' + BRAND + '</span></div><div class="burger"><i></i><i></i><i></i></div></div><div class="nav">' + nav + '</div></aside>' +
+      '<header class="tp"><span class="user">' + USER + '<i></i></span></header><div class="ct">' + body + '</div><footer class="ftr">' + FOOTER + '</footer>' + (o.over || '') + '</div>';
+  }
+  const crumb = (path) => '<span class="crumb"><span class="h">홈</span>' + path.map((p) => '<s>&gt;</s>' + p).join('') + '</span>';
+  const head = (path, extra) => '<div class="ph">' + crumb(path) + '<div class="acts">' + (extra || '') + '</div></div>';
+  const seg = (opts, on) => '<div class="seg">' + opts.map((t, i) => '<span class="' + (i === on ? 'on' : '') + '">' + t + '</span>').join('') + '</div>';
+  const kpi = (k, v, s, go) => '<div class="c kpi"' + (go ? ' data-go="' + go + '"' : '') + '><div class="k">' + k + '</div><div class="v">' + v + '</div><div class="s">' + s + '</div></div>';
+  const card = (title, body, o) => { o = o || {}; return '<div class="c"' + (o.style ? ' style="' + o.style + '"' : '') + '><div class="ch">' + title + (o.r ? '<span class="r">' + o.r + '</span>' : '') + '</div>' + body + '</div>'; };
+  const field = (label, val, o) => { o = o || {}; return '<div><div class="lab">' + label + (o.req ? ' <em>*</em>' : '') + '</div><div class="' + (o.sel ? 'sel' : 'inp') + (o.ph ? ' ph-t' : '') + (o.ro ? ' ro' : '') + (o.err ? ' err' : '') + '">' + val + '</div>' + (o.msg ? '<div class="msg' + (o.err ? ' err' : '') + '">' + o.msg + '</div>' : '') + '</div>'; };
+  // 팝업 화면: 뒤 화면을 깔 때 그 화면의 연결(data-go)을 끈다 → shell(키, '<div class="dimmed">' + nogo(H.L1()) + '</div>', { over: '<div class="shade"></div><div class="modal" style="left:420px;top:160px;width:600px"><h3>제목<span class="x" data-go="L1">✕</span></h3><div class="mb">…</div><div class="foot">…</div></div>' })
+  const nogo = (h) => h.replace(/ data-go="/g, ' data-x="');
+  // 설계용 지도 자리 (실제 지도 SDK가 아님). 지도가 없는 프로젝트는 쓰지 않는다
+  // 설계용 지도 자리 (실제 지도 SDK가 아님): 공원 녹지 · 산책로 · 호수 위에 시설 핀
+  const PIN = { ok: '#2E9E6B', off: '#9AA3AF', sel: '#E8554E' };
+  const mapBox = (pins, style) => '<div class="mapw" style="' + (style || '') + '"><svg class="map" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="800" height="500" fill="#EEF3EA"/>' +
+    '<path d="M60 60h520l120 140-40 260H90z" fill="#D9EBCF"/><ellipse cx="430" cy="300" rx="120" ry="70" fill="#CFE6F5"/><path d="M0 420C180 380 360 440 800 360" stroke="#FBDB72" stroke-width="8" fill="none"/><path d="M120 120C260 200 300 160 420 220S640 180 660 300" stroke="#FFFFFF" stroke-width="5" stroke-dasharray="2 8" stroke-linecap="round" fill="none"/>' +
+    (pins || []).map((p) => '<g transform="translate(' + p[0] + ' ' + p[1] + ')"><path d="M0 0C-3-6-11-11-11-19a11 11 0 0 1 22 0c0 8-8 13-11 19z" fill="' + PIN[p[2] || 'ok'] + '" stroke="#FFF" stroke-width="1.5"/><circle cy="-19" r="4" fill="#FFF"/></g>').join('') + '</svg></div>';
+  const PINS = [[180, 170, 'ok'], [300, 240, 'ok'], [560, 200, 'off'], [620, 330, 'ok'], [250, 360, 'ok']];
+
+  // ---------- 화면 시안 ----------
+  const H = {};
+  H.D1 = () => shell('dash', head(['대시보드']) +
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">' + kpi('오늘 예약', '18건', '어제보다 +4', 'B1') + kpi('승인 대기', '4건', '24시간 안에 처리', 'B1') + kpi('점검 중 시설', '1곳', '전체 5곳', 'F1') + '</div>' +
+    '<div class="row" style="flex:1">' + card('시설 위치', mapBox(PINS, 'height:100%'), { style: 'flex:1.5;display:flex;flex-direction:column' }) +
+      card('승인 대기 예약', '<table class="t tight"><tr><th>시설</th><th>이용일</th><th></th></tr>' + [['캠핑장 A구역', '11-02'], ['풋살장', '11-03'], ['숲속 회의실', '11-05']].map((r) => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td class="r"><span class="btn sm" data-go="B2">확인</span></td></tr>').join('') + '</table>', { style: 'flex:1' }) + '</div>');
+  const FAC = [['캠핑장 A구역', '캠핑', '40명', '<span class="tg t-ok">운영</span>'], ['풋살장', '체육', '20명', '<span class="tg t-ok">운영</span>'], ['숲속 회의실', '실내', '16명', '<span class="tg t-ok">운영</span>'], ['야외 무대', '공연', '200명', '<span class="tg t-wr">점검 중</span>'], ['피크닉장', '야외', '60명', '<span class="tg t-ok">운영</span>']];
+  H.F1 = () => shell('fac', head(['시설 관리'], '<span class="btn pri sm" data-go="F2">+ 시설 등록</span>') +
+    '<div class="row" style="flex:1">' + card('시설 지도', mapBox(PINS, 'height:100%'), { style: 'flex:1;display:flex;flex-direction:column' }) +
+    card('시설 목록 <span class="cnt">5곳</span>', '<div class="inp ph-t" style="margin-bottom:12px">시설명 검색</div><table class="t"><tr><th>시설명</th><th>유형</th><th>수용</th><th>상태</th><th></th></tr>' +
+      FAC.map((r) => '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td><td class="r"><span class="btn sm" data-go="F2">수정</span></td></tr>').join('') + '</table>', { style: 'flex:1.2' }) + '</div>');
+  H.F2 = () => shell('fac', head(['시설 관리', '등록']) +
+    '<div class="row" style="flex:1">' + card('시설 정보', '<div style="display:grid;gap:12px">' + field('시설명', '캠핑장 B구역', { req: 1 }) + field('유형', '캠핑', { sel: 1 }) +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' + field('수용 인원', '30', { req: 1 }) + field('이용 시간', '09:00 ~ 21:00') + '</div>' +
+      '<div><div class="lab">운영 상태</div>' + seg(['운영', '점검 중'], 0) + '</div>' + field('안내 문구', '시민에게 보이는 안내 (500자 이하)', { ph: 1 }) +
+      '<div style="display:flex;gap:6px;justify-content:flex-end"><span class="btn" data-go="F1">취소</span><span class="btn pri" data-go="F1">저장</span></div></div>', { style: 'flex:1' }) +
+    card('위치 선택', '<div class="note i" style="margin-bottom:10px">지도를 눌러 위치를 고르세요. 좌표는 직접 입력하지 않습니다.</div>' + mapBox(PINS.concat([[470, 160, 'sel']]), 'flex:1') + '<div class="msg">선택한 위치: 북쪽 잔디광장 옆</div>', { style: 'flex:1.3;display:flex;flex-direction:column' }) + '</div>');
+  const BK = [['R-1102-07', '캠핑장 A구역', '11-02', '김○○', '<span class="tg t-wr">승인 대기</span>'], ['R-1103-02', '풋살장', '11-03', '이○○', '<span class="tg t-wr">승인 대기</span>'], ['R-1101-11', '숲속 회의실', '11-01', '박○○', '<span class="tg t-ok">승인</span>'], ['R-1031-04', '피크닉장', '10-31', '최○○', '<span class="tg">반려</span>']];
+  H.B1 = () => shell('book', head(['예약 관리']) +
+    card('예약 목록 <span class="cnt">4건</span>', '<div style="display:flex;gap:10px;margin-bottom:12px">' + seg(['전체', '승인 대기', '승인', '반려'], 1) + '<div class="inp ph-t" style="flex:1">예약 번호 · 신청자 검색</div></div><table class="t"><tr><th>예약 번호</th><th>시설</th><th>이용일</th><th>신청자</th><th>상태</th><th></th></tr>' +
+      BK.map((r) => '<tr><td class="mono">' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td><td>' + r[4] + '</td><td class="r"><span class="btn sm" data-go="B2">상세</span></td></tr>').join('') + '</table>', { style: 'flex:1' }));
+  H.B2 = () => shell('book', '<div class="dimmed">' + nogo(H.B1()) + '</div>', { over: '<div class="shade"></div><div class="modal" style="left:470px;top:150px;width:560px"><h3>예약 상세 · R-1102-07<span class="x" data-go="B1">✕</span></h3><div class="mb">' +
+    '<table class="t tight"><tr><td>시설</td><td>캠핑장 A구역</td></tr><tr><td>이용일</td><td>11-02 (토) 1박</td></tr><tr><td>인원</td><td>4명</td></tr><tr><td>신청자</td><td>김○○ · 010-****-1234</td></tr></table>' +
+    field('반려 사유', '반려할 때만 입력 (200자 이하)', { ph: 1 }) + '</div><div class="foot"><span class="btn danger" data-go="B1">반려</span><span class="btn pri" data-go="B1">승인</span></div></div>' });
+
+  // ---------- 화면 정의 ----------
+  const SCREENS = [
+    { id: 'D1', flow: 'dash', kind: '페이지', title: '대시보드', purpose: '오늘 예약과 처리할 일을 한 화면에서 봅니다.', feat: ['DASH-01', 'DASH-02'], parts: ['현황 카드 3개', '시설 위치 지도', '승인 대기 예약'], states: ['대기 0건 → "처리할 예약이 없습니다."'], rules: ['카드 수치는 예약 목록과 같은 기준'], ex: ['EX-01'], at: ['AT-01'] },
+    { id: 'F1', flow: 'fac', kind: '페이지', title: '시설 목록 · 지도', purpose: '시설을 지도와 목록으로 함께 관리합니다.', feat: ['FAC-01'], parts: ['시설 지도', '검색', '시설 목록', '시설 등록 버튼'], states: ['검색 결과 없음'], rules: ['점검 중 시설은 회색 핀'], ex: ['EX-01', 'EX-06'], at: ['AT-02'] },
+    { id: 'F2', flow: 'fac', kind: '페이지', title: '시설 등록 · 위치 선택', purpose: '시설 정보를 입력하고 위치를 지도에서 고릅니다.', feat: ['FAC-02', 'FAC-03'], parts: ['시설명 · 유형 · 수용 인원 · 이용 시간 · 운영 상태 · 안내 문구', '위치 지도', '취소 · 저장'], states: ['위치 미선택 → 저장 차단', '시설명 중복 → 안내'], rules: ['좌표 직접 입력 없음'], ex: ['EX-02', 'EX-03', 'EX-07'], at: ['AT-03'] },
+    { id: 'B1', flow: 'book', kind: '페이지', title: '예약 목록', purpose: '예약을 상태별로 보고 처리합니다.', feat: ['BOOK-01'], parts: ['상태 탭', '검색', '예약 목록'], states: ['검색 결과 없음'], rules: ['기본 탭은 승인 대기'], ex: ['EX-06'], at: ['AT-04'] },
+    { id: 'B2', flow: 'book', kind: '팝업', title: '예약 상세 · 승인/반려', purpose: '예약 내용을 확인하고 승인하거나 반려합니다.', feat: ['BOOK-02'], parts: ['예약 정보', '반려 사유', '반려 · 승인'], states: ['반려 사유 공백 → 반려 차단', '이미 처리됨 → 안내 후 새로고침'], rules: ['신청자 연락처는 가려서 표시'], ex: ['EX-04', 'EX-05'], at: ['AT-04'] }
+  ];
+  const FLOWS = [
+    { id: 'dash', no: '01', title: '대시보드', desc: '오늘 현황과 처리할 일', screens: ['D1'] },
+    { id: 'fac', no: '02', title: '시설 관리', desc: '시설 등록 · 수정 · 위치', screens: ['F1', 'F2'] },
+    { id: 'book', no: '03', title: '예약 관리', desc: '예약 승인 · 반려', screens: ['B1', 'B2'] }
+  ];
+  const ISSUES = [
+    { id: 'RV-01', scr: 'F2', sev: 'high', st: 'done', t: '좌표 직접 입력으로 위치 오류', src: '기획서 3쪽', p: '위도 · 경도 입력칸이 있어 잘못된 좌표가 저장될 수 있습니다.', fx: '지도 선택만 허용하고 입력칸을 없앴습니다(FAC-03, EX-03).' },
+    { id: 'RV-02', scr: 'B2', sev: 'mid', st: 'done', t: '반려 사유 없이 반려 가능', src: '요청서 2.3', p: '시민이 반려 이유를 알 수 없습니다.', fx: '반려 시 사유 필수(EX-04).' },
+    { id: 'RV-03', scr: 'B2', sev: 'mid', st: 'ask', t: '두 관리자가 같은 예약을 동시에 처리', src: '운영 인터뷰', p: '먼저 처리된 예약을 다시 승인할 수 있습니다.', fx: '저장 직전 상태를 다시 확인하고 안내(EX-05).', rest: '서버의 상태 확인 응답 형식 확인 필요' },
+    { id: 'RV-04', scr: 'D1', sev: 'low', st: 'done', t: '카드 수치와 목록 수 불일치', src: '기획서 1쪽', p: '대시보드는 전체, 목록은 오늘 기준이었습니다.', fx: '같은 기준으로 맞췄습니다.' }
+  ];
+
+  // ---------- 프로젝트 데이터에서 파생 ----------
+  const byId = {}; SCREENS.forEach((s) => { s.ux = ISSUES.filter((u) => u.scr === s.id); byId[s.id] = s; });
+  const flowOf = {}; FLOWS.forEach((f) => { flowOf[f.id] = f; });
+  const SEV = { high: '높음', mid: '중간', low: '낮음' }, SEVN = { high: 0, mid: 1, low: 2 };
+  const IST = PROJECT.issueStates || {};
+  const ST = { done: ['good', IST.done || '반영'], ask: ['mid', IST.ask || '반영 · 확인 필요'] };
+  // ---------- 월드 ----------
+  const world = $('world'), stage = $('stage'), grid = $('grid'), app = $('app');
+  const GAP = 360, PADX = 120, PADTOP = 290, SPECGAP = 64, ROWGAP = 220, FW = 1440, FH = 900;
+  let frames = {}, sections = [], edges = [], svg = null, bounds = { w: 1, h: 1 };
+  let sel = null;
+  function specHTML(s) {
+    const fchips = s.feat.map((f) => '<span class="chip acc">' + f + '</span>').join('');
+    const exchips = s.ex.map((x) => '<span class="chip">' + x + '</span>').join('') + s.at.map((x) => '<span class="chip good">' + x + '</span>').join('');
+    return '<h4><b>' + s.id + '</b>' + esc(s.title) + '<small>' + esc(s.kind) + '</small></h4>' +
+      '<div><dt>목적</dt><dd>' + esc(s.purpose) + '</dd><dt>기능 ID</dt><dd class="chips">' + fchips + '</dd><dt>연관 예외 · 검수</dt><dd class="chips">' + exchips + '</dd>' +
+      (function () { const fs = fieldsFor(s.id), ws = [...new Set(procFor(s).map((p) => p.where))]; return '<dt>입력 · 처리</dt><dd class="chips"><span class="chip">입력 필드 ' + fs.length + '</span>' + ws.map((w) => '<span class="chip ' + (/서버/.test(w) ? 'mid' : 'good') + '">' + esc(w) + '</span>').join('') + '</dd>'; })() + '</div>' +
+      '<div><dt>구성</dt><dd><ul>' + s.parts.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></dd></div>' +
+      '<div><dt>상태</dt><dd><ul>' + s.states.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></dd><dt>규칙</dt><dd><ul>' + s.rules.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></dd></div>';
+  }
+  function build() {
+    world.innerHTML = ''; frames = {}; sections = [];
+    FLOWS.forEach((f) => {
+      const sec = el('div', 'section', '<h2><b>' + f.no + '</b>' + esc(f.title) + '</h2><p>' + esc(f.desc) + '</p>');
+      world.appendChild(sec); sections.push({ f: f, el: sec });
+      f.screens.forEach((id) => {
+        const s = byId[id];
+        const fr = el('div', 'frame'); fr.dataset.id = id;
+        fr.appendChild(el('div', 'ft', '<b>' + id + '</b>' + esc(s.title) + '<i>' + esc(s.kind) + '</i>'));
+        const shot = el('div', 'shot', H[id]()); fr.appendChild(shot);
+        if (s.ux.length) {
+          const top = s.ux.slice().sort((a, b) => SEVN[a.sev] - SEVN[b.sev])[0].sev;
+          const p = el('button', 'pin ' + top, '<span aria-hidden="true">!</span>' + s.ux.length); p.dataset.pin = id; p.setAttribute('aria-label', id + ' 검토 이슈 ' + s.ux.length + '개'); fr.appendChild(p);
+        }
+        const spec = el('div', 'spec', specHTML(s)); spec.dataset.id = id; fr.appendChild(spec);
+        world.appendChild(fr);
+        frames[id] = { s: s, el: fr, spec: spec, x: 0, y: 0 };
+      });
+    });
+    layout();
+  }
+  function layout() {
+    let y = 0, maxW = 0;
+    sections.forEach((sec) => {
+      const ids = sec.f.screens;
+      let specH = 0; ids.forEach((id) => { specH = Math.max(specH, frames[id].spec.offsetHeight); });
+      const w = PADX * 2 + ids.length * FW + (ids.length - 1) * GAP;
+      const h = PADTOP + FH + SPECGAP + specH + 110;
+      sec.x = 0; sec.y = y; sec.w = w; sec.h = h;
+      Object.assign(sec.el.style, { left: '0px', top: y + 'px', width: w + 'px', height: h + 'px' });
+      ids.forEach((id, i) => {
+        const f = frames[id]; f.x = PADX + i * (FW + GAP); f.y = y + PADTOP;
+        f.el.style.left = f.x + 'px'; f.el.style.top = f.y + 'px';
+        f.spec.style.top = (FH + SPECGAP) + 'px';
+      });
+      maxW = Math.max(maxW, w); y += h + ROWGAP;
+    });
+    bounds = { w: maxW, h: y - ROWGAP };
+    buildEdges();
+  }
+  function buildEdges() {
+    edges = [];
+    Object.keys(frames).forEach((id) => {
+      const f = frames[id], fr = f.el.querySelector('.shot').getBoundingClientRect();
+      const k = fr.width / FW || 1;
+      f.el.querySelectorAll('.shot [data-go]').forEach((h) => {
+        const t = h.dataset.go; if (!frames[t] || t === id) return;
+        const r = h.getBoundingClientRect();
+        const lbl = (h.dataset.lbl || h.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 18) || '이동';
+        const ord = (a) => FLOWS.findIndex((x) => x.screens.indexOf(a) >= 0) * 10 + FLOWS.find((x) => x.screens.indexOf(a) >= 0).screens.indexOf(a);
+        edges.push({ f: id, t: t, x: f.x + (r.left - fr.left) / k, y: f.y + (r.top - fr.top) / k, w: r.width / k, h: r.height / k, label: lbl, back: ord(t) < ord(id), hs: h });
+      });
+    });
+    drawEdges();
+  }
+  // 연결선 모드: route(우회 · 화면 사이 통로로만, 화면 앞) · front(곡선 · 화면 앞) · back(곡선 · 화면 뒤)
+  let edgeMode = 'route', selEdge = null;
+  try { edgeMode = localStorage.getItem('fm.edgeMode') || 'route'; } catch (e) { /* 저장 불가 무시 */ }
+  const secOf = (id) => sections.find((s) => s.f.screens.indexOf(id) >= 0);
+  const colOf = (id) => secOf(id).f.screens.indexOf(id);
+  const gapRight = (id) => frames[id].x + FW + GAP / 2;
+  const gapLeft = (id) => frames[id].x - (colOf(id) === 0 ? PADX / 2 : GAP / 2);
+  const bandY = (sec) => sec.y + 205;
+  // 꺾인 점 목록 → 모서리를 둥글린 경로
+  function roundPath(P, r) {
+    let d = 'M' + P[0][0] + ' ' + P[0][1];
+    for (let k = 1; k < P.length - 1; k++) {
+      const a = P[k - 1], b = P[k], c = P[k + 1];
+      const l1 = Math.hypot(b[0] - a[0], b[1] - a[1]), l2 = Math.hypot(c[0] - b[0], c[1] - b[1]), rr = Math.min(r, l1 / 2, l2 / 2);
+      const p1 = [b[0] - (b[0] - a[0]) / (l1 || 1) * rr, b[1] - (b[1] - a[1]) / (l1 || 1) * rr], p2 = [b[0] + (c[0] - b[0]) / (l2 || 1) * rr, b[1] + (c[1] - b[1]) / (l2 || 1) * rr];
+      d += 'L' + p1[0] + ' ' + p1[1] + 'Q' + b[0] + ' ' + b[1] + ' ' + p2[0] + ' ' + p2[1];
+    }
+    const z = P[P.length - 1]; return d + 'L' + z[0] + ' ' + z[1];
+  }
+  function routeEdges() {
+    // 통로마다 차선을 나눠 선이 겹치지 않게 한다
+    const lanes = {}, take = (key) => { lanes[key] = (lanes[key] || 0) + 1; return lanes[key] - 1; };
+    const incoming = {}; edges.forEach((e, i) => { (incoming[e.t] = incoming[e.t] || []).push(i); });
+    Object.keys(incoming).forEach((k) => incoming[k].sort((a, b) => (frames[edges[a].f].y - frames[edges[b].f].y) || (frames[edges[a].f].x - frames[edges[b].f].x) || (edges[a].y - edges[b].y)));
+    const plan = edges.map((e, i) => {
+      const S = frames[e.f], T = frames[e.t], sS = secOf(e.f), sT = secOf(e.t);
+      const sy = Math.min(S.y + FH - 30, Math.max(S.y + 30, e.y + e.h / 2));
+      const slot = incoming[e.t].indexOf(i), ey = T.y + 60 + slot * 40;
+      const X1 = gapRight(e.f), X2 = gapLeft(e.t);
+      return { e: e, S: S, T: T, sS: sS, sT: sT, sy: sy, ey: Math.min(T.y + FH - 30, ey), X1: X1, X2: X2, direct: sS === sT && Math.abs(X1 - X2) < 1 };
+    });
+    const out = plan.map((q) => {
+      const v1 = take('v' + Math.round(q.X1)), o1 = ((v1 % 9) - 4) * 14;
+      if (q.direct) { const x = q.X1 + o1; return { pts: [[q.S.x + FW, q.sy], [x, q.sy], [x, q.ey], [q.T.x, q.ey]], lab: 1 }; }
+      const bl = take('b' + sections.indexOf(q.sT)), ob = ((bl % 7) - 3) * 11, Yb = bandY(q.sT) + ob;
+      const v2 = take('v' + Math.round(q.X2)), o2 = ((v2 % 9) - 4) * 14;
+      const x1 = q.X1 + o1, x2 = q.X2 + o2;
+      return { pts: [[q.S.x + FW, q.sy], [x1, q.sy], [x1, Yb], [x2, Yb], [x2, q.ey], [q.T.x, q.ey]], lab: 2 };
+    });
+    return out;
+  }
+  function drawEdges() {
+    if (svg) svg.remove();
+    const NS = 'http://www.w3.org/2000/svg';
+    svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'edges mode-' + edgeMode); svg.setAttribute('width', bounds.w); svg.setAttribute('height', bounds.h);
+    svg.innerHTML = '<defs><marker id="arF" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah"/></marker><marker id="arB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="ah back"/></marker></defs>';
+    const R = edgeMode === 'route' ? routeEdges() : null;
+    edges.forEach((e, i) => {
+      let d, mx, my, ex, ey;
+      if (R) {
+        const P = R[i].pts; d = roundPath(P, 28); ex = P[0][0]; ey = P[0][1];
+        const a = P[R[i].lab], b = P[R[i].lab + 1], f = 0.25 + (i % 5) * 0.12; mx = a[0] + (b[0] - a[0]) * f; my = a[1] + (b[1] - a[1]) * f;
+      } else {
+        const T = frames[e.t], sx = e.x + e.w, sy = e.y + e.h / 2; let tx2, ty2, c1x, c1y, c2x, c2y;
+        if (T.x > e.x + 200 && Math.abs(T.y - frames[e.f].y) < 10) { tx2 = T.x - 6; ty2 = T.y + 90 + (i % 5) * 70; c1x = sx + 220; c1y = sy; c2x = tx2 - 220; c2y = ty2; }
+        else if (T.y > frames[e.f].y + 10) { tx2 = T.x + FW / 2 + ((i % 5) - 2) * 90; ty2 = T.y - 70; c1x = sx + 300; c1y = sy; c2x = tx2; c2y = ty2 - 500; }
+        else if (T.y < frames[e.f].y - 10) { tx2 = T.x + FW / 2 + ((i % 5) - 2) * 90; ty2 = T.y + FH + 6; c1x = sx + 300; c1y = sy; c2x = tx2; c2y = ty2 + 500; }
+        else { tx2 = T.x + FW + 6; ty2 = T.y + 140 + (i % 5) * 70; c1x = sx + 160; c1y = sy - 380; c2x = tx2 + 260; c2y = ty2 - 120; }
+        d = 'M' + sx + ' ' + sy + 'C' + c1x + ' ' + c1y + ' ' + c2x + ' ' + c2y + ' ' + tx2 + ' ' + ty2; ex = sx; ey = sy;
+        mx = 0.125 * sx + 0.375 * c1x + 0.375 * c2x + 0.125 * tx2; my = 0.125 * sy + 0.375 * c1y + 0.375 * c2y + 0.125 * ty2;
+      }
+      const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'eg' + (e.back ? ' back' : '')); g.dataset.i = i; g.dataset.ei = i;
+      g.innerHTML = '<path class="hit" d="' + d + '"/><path class="e' + (e.back ? ' back' : '') + '" d="' + d + '" marker-end="url(#' + (e.back ? 'arB' : 'arF') + ')"/><circle class="port' + (e.back ? ' back' : '') + '" cx="' + ex + '" cy="' + ey + '" r="9"/>';
+      const txt = e.label + ' → ' + e.t, w = txt.length * 19 + 28;
+      g.innerHTML += '<g class="lbl' + (e.back ? ' back' : '') + '"><rect x="' + (mx - w / 2) + '" y="' + (my - 20) + '" width="' + w + '" height="40" rx="20"/><text x="' + mx + '" y="' + (my + 8) + '" text-anchor="middle">' + esc(txt) + '</text></g>';
+      g.innerHTML += '<title>' + esc(e.f + ' ' + byId[e.f].title + ' → ' + e.t + ' ' + byId[e.t].title + ' · “' + e.label + '”') + '</title>';
+      svg.appendChild(g);
+    });
+    if (edgeMode === 'back') world.insertBefore(svg, world.firstChild.nextSibling); else world.appendChild(svg);
+    highlight();
+  }
+  function highlight() {
+    if (!svg) return;
+    svg.querySelectorAll('g.eg').forEach((n) => {
+      const i = +n.dataset.i, e = edges[i];
+      const on = selEdge != null ? i === selEdge : (sel && (e.f === sel || e.t === sel));
+      const any = selEdge != null || !!sel;
+      n.classList.toggle('hi', !!on); n.classList.toggle('dim', any && !on);
+    });
+    // 선택한 연결선을 맨 위로: 클릭 처리가 끝난 뒤 옮겨야 선택 범위가 흐트러지지 않는다
+    const top = svg.querySelector('g.eg.hi'); if (top && selEdge != null) requestAnimationFrame(() => { if (top.parentNode && top.nextSibling) top.parentNode.appendChild(top); });
+    document.querySelectorAll('.shot .hs-on').forEach((x) => x.classList.remove('hs-on'));
+    if (selEdge != null && edges[selEdge] && edges[selEdge].hs) edges[selEdge].hs.classList.add('hs-on');
+  }
+  function setEdgeMode(m) {
+    edgeMode = m; try { localStorage.setItem('fm.edgeMode', m); } catch (e) { /* 무시 */ }
+    document.querySelectorAll('#edgeMode button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.em === m)));
+    drawEdges();
+  }
+  function selectEdge(i) {
+    selEdge = i; sel = null;
+    Object.keys(frames).forEach((k) => frames[k].el.classList.toggle('sel', false));
+    highlight(); renderLeft(); renderIns(); drawMini();
+    if (window.matchMedia('(max-width: 900px)').matches) app.classList.add('show-right');
+  }
+  function edgeIns(i) {
+    const e = edges[i], A = byId[e.f], B = byId[e.t];
+    const same = edges.map((x, k) => [x, k]).filter((q) => q[1] !== i && ((q[0].f === e.f && q[0].t === e.t) || (q[0].f === e.t && q[0].t === e.f)));
+    const pass = TRANS_DATA[e.f + '>' + e.t] || '';
+    const common = B.feat.filter((f) => A.feat.indexOf(f) >= 0);
+    return '<div><div class="eyebrow">연결 · ' + (e.back ? '앞 단계로 돌아감' : '다음 단계로 이동') + '</div><h2><b>' + e.f + '</b>' + esc(A.title) + '<br><span style="color:var(--fg-3)">→</span> <b>' + e.t + '</b>' + esc(B.title) + '</h2>' +
+      '<p>' + esc(A.title) + ' 화면에서 <b>“' + esc(e.label) + '”</b>을 누르면 ' + esc(B.title) + ' 화면으로 이동합니다. 출발 화면의 누르는 곳은 초록 테두리로 강조됩니다.</p></div>' +
+      '<div class="btnrow"><button class="tb primary" id="eFrom">출발 화면 보기</button><button class="tb" id="eTo">도착 화면 보기</button><button class="tb" id="ePlay">이 연결 따라가기</button></div>' +
+      '<div><h5>연결 정보</h5><div class="fl"><div><b>출발</b><span>' + esc(e.f + ' ' + A.title) + '<small>' + esc(A.kind) + '</small></span></div><div><b>누르는 곳</b><span>“' + esc(e.label) + '”</span></div><div><b>도착</b><span>' + esc(e.t + ' ' + B.title) + '<small>' + esc(B.kind) + '</small></span></div>' +
+        (pass ? '<div><b>넘기는 값</b><span>' + esc(pass) + '</span></div>' : '') + '<div><b>방향</b><span>' + (e.back ? '앞 단계 화면으로 돌아가는 연결(회색 점선)' : '흐름 순서대로 가는 연결(초록 실선)') + '</span></div></div></div>' +
+      (common.length ? '<div><h5>두 화면이 함께 쓰는 기능 <span>' + common.length + '</span></h5><div class="fl">' + common.map((f) => '<div><b>' + f + '</b><span>' + esc(FEAT[f] ? FEAT[f].name : '') + '</span></div>').join('') + '</div></div>' : '') +
+      '<div><h5>도착 화면 기능 ID <span>' + B.feat.length + '</span></h5><div class="fl">' + B.feat.map((f) => '<div><b>' + f + '</b><span>' + esc(FEAT[f] ? FEAT[f].name : '') + '</span></div>').join('') + '</div></div>' +
+      (same.length ? '<div><h5>같은 두 화면 사이 다른 연결 <span>' + same.length + '</span></h5><div style="display:grid;gap:4px">' + same.map((q) => '<button class="link' + (q[0].back ? ' back' : '') + '" data-edge="' + q[1] + '"><span class="ar">' + (q[0].f === e.f ? '→' : '←') + '</span><span class="lb">“' + esc(q[0].label) + '”<small>' + q[0].f + ' → ' + q[0].t + '</small></span><span class="id">' + q[0].t + '</span></button>').join('') + '</div></div>' : '') +
+      '<div><p style="margin:0;font-size:12px">연결선 보기 방식은 툴바의 <b>우회 · 화면 앞 · 화면 뒤</b>에서 바꿀 수 있습니다. Esc로 선택을 풉니다.</p></div>';
+  }
+  // 화면 사이에 넘어가는 값 (화면설계서 업무 흐름과 같은 내용)
+  const TRANS_DATA = PROJECT.transData || {};
+
+  // ---------- 보기 변환 ----------
+  let tx = 0, ty = 0, sc = 0.2;
+  function apply() {
+    world.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + sc + ')';
+    const g = 24 * sc * 5; grid.style.backgroundSize = g + 'px ' + g + 'px'; grid.style.backgroundPosition = tx + 'px ' + ty + 'px';
+    $('zoomVal').textContent = Math.round(sc * 100) + '%';
+    drawMini();
+  }
+  const clampS = (s) => Math.min(1.5, Math.max(0.03, s));
+  function zoomAt(f, cx, cy) { const ns = clampS(sc * f); tx = cx - (cx - tx) * (ns / sc); ty = cy - (cy - ty) * (ns / sc); sc = ns; apply(); }
+  function fitAll() { const r = stage.getBoundingClientRect(); sc = clampS(Math.min((r.width - 60) / bounds.w, (r.height - 60) / bounds.h)); tx = (r.width - bounds.w * sc) / 2; ty = (r.height - bounds.h * sc) / 2; apply(); }
+  function focus(id) {
+    const f = frames[id]; if (!f) return;
+    const r = stage.getBoundingClientRect(), h = FH + SPECGAP + f.spec.offsetHeight + 90;
+    sc = clampS(Math.min((r.width - 80) / FW, (r.height - 60) / h));
+    tx = r.width / 2 - (f.x + FW / 2) * sc; ty = 30 - (f.y - 70) * sc; apply();
+  }
+  stage.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const r = stage.getBoundingClientRect();
+    if (e.ctrlKey || e.metaKey) zoomAt(Math.exp(-e.deltaY * 0.01), e.clientX - r.left, e.clientY - r.top);
+    else { tx -= e.deltaX; ty -= e.deltaY; apply(); }
+  }, { passive: false });
+  const ptrs = new Map(); let drag = null, pinch = null;
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.minimap')) return;
+    // 캔버스에서는 글자 선택 드래그를 시작하지 않는다 (연결선 · 화면 클릭 시 화면 전체가 파랗게 선택되는 문제)
+    if (e.button === 0 && !e.target.closest('input, textarea, select')) { e.preventDefault(); const s = window.getSelection && window.getSelection(); if (s && s.rangeCount) s.removeAllRanges(); }
+    stage.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 1) drag = { x: e.clientX, y: e.clientY, tx: tx, ty: ty, moved: false, target: e.target };
+    else if (ptrs.size === 2) { const p = [...ptrs.values()]; pinch = { d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y), s: sc }; drag = null; }
+  });
+  stage.addEventListener('pointermove', (e) => {
+    if (!ptrs.has(e.pointerId)) return; ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pinch && ptrs.size === 2) { const p = [...ptrs.values()], r = stage.getBoundingClientRect(); const d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y); zoomAt((pinch.s * d / pinch.d) / sc, (p[0].x + p[1].x) / 2 - r.left, (p[0].y + p[1].y) / 2 - r.top); return; }
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.moved && Math.hypot(dx, dy) > 4) { drag.moved = true; stage.classList.add('dragging'); }
+    if (drag.moved) { tx = drag.tx + dx; ty = drag.ty + dy; apply(); }
+  });
+  const endPtr = (e) => {
+    ptrs.delete(e.pointerId); if (ptrs.size < 2) pinch = null;
+    stage.classList.remove('dragging');
+    if (drag && !drag.moved && e.type === 'pointerup') clickAt(drag.target);
+    drag = null;
+  };
+  stage.addEventListener('pointerup', endPtr); stage.addEventListener('pointercancel', endPtr);
+  function clickAt(t) {
+    const eg = t.closest && t.closest('[data-ei]'); if (eg) { selectEdge(+eg.dataset.ei); return; }
+    const pin = t.closest('[data-pin]'); if (pin) { select(pin.dataset.pin, true); return; }
+    const hs = t.closest('.shot [data-go]');
+    if (hs && app.classList.contains('show-hs') && frames[hs.dataset.go]) { select(hs.dataset.go); focus(hs.dataset.go); return; }
+    const fr = t.closest('.frame'); if (fr) { select(fr.dataset.id); return; }
+    const sec = t.closest('.section'); if (!sec) select(null);
+  }
+
+  // ---------- 미니맵 ----------
+  const mm = $('mm'), mctx = mm.getContext('2d');
+  function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+  function drawMini() {
+    const W = mm.clientWidth, Hh = mm.clientHeight; if (!W) return;
+    const dpr = window.devicePixelRatio || 1; mm.width = W * dpr; mm.height = Hh * dpr; mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const k = Math.min((W - 12) / bounds.w, (Hh - 12) / bounds.h), ox = (W - bounds.w * k) / 2, oy = (Hh - bounds.h * k) / 2;
+    mctx.clearRect(0, 0, W, Hh);
+    mctx.fillStyle = css('--chrome-2'); sections.forEach((s) => mctx.fillRect(ox + s.x * k, oy + s.y * k, s.w * k, s.h * k));
+    Object.keys(frames).forEach((id) => { const f = frames[id]; mctx.fillStyle = id === sel ? css('--accent') : css('--fg-3'); mctx.fillRect(ox + f.x * k, oy + f.y * k, FW * k, FH * k); });
+    const r = stage.getBoundingClientRect();
+    mctx.strokeStyle = css('--accent'); mctx.lineWidth = 1.5; mctx.strokeRect(ox + (-tx / sc) * k, oy + (-ty / sc) * k, (r.width / sc) * k, (r.height / sc) * k);
+    mm._map = { k: k, ox: ox, oy: oy };
+  }
+  $('minimap').addEventListener('click', (e) => {
+    const m = mm._map; if (!m) return; const b = mm.getBoundingClientRect(), r = stage.getBoundingClientRect();
+    const wx = (e.clientX - b.left - m.ox) / m.k, wy = (e.clientY - b.top - m.oy) / m.k;
+    tx = r.width / 2 - wx * sc; ty = r.height / 2 - wy * sc; apply();
+  });
+
+  // ---------- 왼쪽 패널 ----------
+  let leftTab = 'screens';
+  function renderLeft() {
+    const box = $('leftScroll'); box.innerHTML = '';
+    if (leftTab === 'screens') {
+      FLOWS.forEach((f) => {
+        const d = el('div', 'flow'); const h = el('h3', '', esc(f.no + ' ' + f.title) + '<span>' + f.screens.length + '</span>'); h.addEventListener('click', () => focusFlow(f)); d.appendChild(h);
+        f.screens.forEach((id) => {
+          const s = byId[id];
+          const top = s.ux.length ? s.ux.slice().sort((a, b) => SEVN[a.sev] - SEVN[b.sev])[0].sev : '';
+          const b = el('button', 'item', '<span class="id">' + id + '</span><span class="nm">' + esc(s.title) + '</span>' + (top ? '<span class="dot ' + top + '" title="검토 이슈 ' + s.ux.length + '"></span>' : '<span class="kd">' + esc(s.kind.split(' · ')[0]) + '</span>'));
+          if (id === sel) b.setAttribute('aria-current', 'true');
+          b.addEventListener('click', () => { select(id); focus(id); app.classList.remove('show-left'); }); d.appendChild(b);
+        });
+        box.appendChild(d);
+      });
+    } else {
+      const w = el('div', 'uxlist');
+      const done = ISSUES.filter((u) => u.st === 'done').length;
+      w.appendChild(el('div', 'tiny', '<span style="color:var(--fg-2);font-size:12px">이슈 ' + ISSUES.length + '건 · ' + ST.done[1] + ' ' + done + ' · ' + ST.ask[1] + ' ' + (ISSUES.length - done) + '</span>'));
+      ['high', 'mid', 'low'].forEach((sv) => {
+        const list = ISSUES.filter((u) => u.sev === sv); if (!list.length) return;
+        w.appendChild(el('h4', '', '심각도 ' + SEV[sv] + ' · ' + list.length));
+        list.forEach((u) => {
+          const b = el('button', '', '<span class="meta"><span class="dot ' + u.sev + '"></span>' + u.id + ' · ' + (u.scr || '문서 전체') + '<span class="chip ' + ST[u.st][0] + '" style="margin-left:auto">' + ST[u.st][1] + '</span></span><b>' + esc(u.t) + '</b>');
+          b.addEventListener('click', () => { if (u.scr) { select(u.scr, true); focus(u.scr); } else { openDocs(u.id === 'RV-13' ? 'rtm' : 'wbs'); } app.classList.remove('show-left'); });
+          w.appendChild(b);
+        });
+      });
+      box.appendChild(w);
+    }
+  }
+  function focusFlow(f) {
+    const s = sections.find((x) => x.f === f), r = stage.getBoundingClientRect();
+    sc = clampS(Math.min((r.width - 60) / s.w, (r.height - 60) / s.h)); tx = (r.width - s.w * sc) / 2; ty = (r.height - s.h * sc) / 2 - s.y * sc; apply();
+  }
+  $('tabScreens').addEventListener('click', () => { leftTab = 'screens'; $('tabScreens').setAttribute('aria-selected', 'true'); $('tabUx').setAttribute('aria-selected', 'false'); renderLeft(); });
+  $('tabUx').addEventListener('click', () => { leftTab = 'ux'; $('tabUx').setAttribute('aria-selected', 'true'); $('tabScreens').setAttribute('aria-selected', 'false'); renderLeft(); });
+
+  // ---------- 인스펙터 ----------
+  const uxCard = (u) => '<div class="uxcard"><div class="tt"><span class="chip ' + u.sev + '">' + SEV[u.sev] + '</span><span class="chip ' + ST[u.st][0] + '">' + ST[u.st][1] + '</span>' + esc(u.t) + '</div><div class="src">' + u.id + ' · 근거 ' + esc(u.src) + '</div><div>' + esc(u.p) + '</div><div class="fx">' + esc(u.fx) + '</div>' + (u.rest ? '<div class="rest">남은 일 · ' + esc(u.rest) + '</div>' : '') + '</div>';
+  function renderIns(scrollUx) {
+    const ins = $('ins');
+    if (selEdge != null && edges[selEdge]) {
+      const e = edges[selEdge]; ins.innerHTML = edgeIns(selEdge);
+      $('eFrom').onclick = () => { focus(e.f); }; $('eTo').onclick = () => { select(e.t); focus(e.t); }; $('ePlay').onclick = () => { openProto(e.f); };
+      ins.querySelectorAll('[data-edge]').forEach((b) => b.addEventListener('click', () => selectEdge(+b.dataset.edge)));
+      return;
+    }
+    if (!sel) {
+      const done = ISSUES.filter((u) => u.st === 'done').length;
+      ins.innerHTML = '<div><div class="eyebrow">' + PROJECT.eyebrow + '</div><h2>' + PROJECT.title + '</h2><p>' + PROJECT.intro + '</p></div>' +
+        '<div class="stats"><div class="stat"><b>' + SCREENS.length + '</b><span>화면</span></div><div class="stat"><b>' + edges.length + '</b><span>연결</span></div><div class="stat"><b>' + ISSUES.length + '</b><span>검토 이슈</span></div><div class="stat"><b>' + DOC.features.length + '</b><span>기능 ID</span></div><div class="stat"><b>' + DOC.ex.length + '</b><span>예외</span></div><div class="stat"><b>' + DOC.wbsBase.toFixed(1) + '</b><span>기준 인일</span></div></div>' +
+        (PROJECT.overviewTop ? PROJECT.overviewTop(done) : '') +
+        '<div class="btnrow"><button class="tb primary" id="insDocs">문서 열기</button><button class="tb" id="insPlay">프로토타입</button><button class="tb" id="insUx">이슈 목록</button></div>' +
+        (PROJECT.overviewBottom || '') +
+        '<div><h5>조작</h5><div class="keys"><kbd>드래그</kbd><span>캔버스 이동</span><kbd>Ctrl+휠</kbd><span>확대·축소 (핀치 가능)</span><kbd>1</kbd><span>전체 보기</span><kbd>2</kbd><span>선택 화면으로</span><kbd>P</kbd><span>프로토타입</span><kbd>D</kbd><span>문서 패널</span><kbd>연결선 클릭</kbd><span>연결 정보 보기</span><kbd>Esc</kbd><span>선택 해제 · 닫기</span></div></div>';
+      $('insDocs').onclick = () => openDocs('log'); $('insPlay').onclick = () => openProto(PROJECT.start || SCREENS[0].id); $('insUx').onclick = () => $('tabUx').click();
+      return;
+    }
+    const s = byId[sel], f = flowOf[s.flow];
+    const outs = edges.filter((e) => e.f === sel), ins2 = edges.filter((e) => e.t === sel);
+    const uniq = (arr, key) => { const seen = {}; return arr.filter((e) => { const k = key(e); if (seen[k]) return false; seen[k] = 1; return true; }); };
+    const link = (e, dir) => '<button class="link' + (e.back ? ' back' : '') + '" data-to="' + (dir === 'out' ? e.t : e.f) + '"><span class="ar">' + (dir === 'out' ? '→' : '←') + '</span><span class="lb">' + esc(byId[dir === 'out' ? e.t : e.f].title) + '<small>' + esc(e.label) + '</small></span><span class="id">' + (dir === 'out' ? e.t : e.f) + '</span></button>';
+    ins.innerHTML = '<div><div class="eyebrow">' + f.no + ' ' + esc(f.title) + ' · ' + esc(s.kind) + '</div><h2><b>' + s.id + '</b>' + esc(s.title) + '</h2><p>' + esc(s.purpose) + '</p></div>' +
+      '<div class="btnrow"><button class="tb primary" id="insPlay">이 화면부터 프로토타입</button><button class="tb" id="insFocus">화면으로 이동</button><button class="tb" id="insSb">화면설계서</button></div>' +
+      '<div><h5>기능 ID <span>' + s.feat.length + '</span></h5><div class="fl">' + s.feat.map((id) => { const x = FEAT[id]; return '<div><b>' + id + '</b><span>' + esc(x ? x.name : '') + ' <span class="chip">' + esc(x ? x.impl : '') + '</span><small>' + esc(x ? x.desc : '') + '</small></span></div>'; }).join('') + '</div></div>' +
+      (s.ux.length ? '<div id="insUxBox"><h5>검토 이슈 <span>' + s.ux.length + '</span></h5><div style="display:grid;gap:6px">' + s.ux.map(uxCard).join('') + '</div></div>' : '') +
+      (function () {
+        const fs = fieldsFor(s.id), ps = procFor(s);
+        let h = '';
+        if (fs.length) h += '<div><h5>입력 필드 <span>' + fs.length + '</span></h5><div class="fl">' + fs.map((f) => '<div><b>' + esc(f.key) + '</b><span>' + esc(f.label) + ' <span class="chip">' + esc(f.type) + '</span> <span class="chip ' + (f.req === '필수' ? 'acc' : '') + '">' + esc(f.req) + '</span><small>' + esc(f.rule) + ' · 기본 ' + esc(f.def) + '</small><small>저장 → ' + esc(f.store) + '</small></span></div>').join('') + '</div></div>';
+        if (ps.length) h += '<div><h5>서버 · DB 처리 <span>' + ps.length + '</span></h5><div style="display:grid;gap:6px">' + ps.map((p) => '<div class="uxcard"><div class="tt">' + esc(p.feat) + ' ' + whereChip(p.where) + '</div><div>' + esc(p.target) + '</div><div class="src">운영 영향 · ' + esc(p.impact) + '</div></div>').join('') + '</div><p style="margin:6px 0 0;font-size:12px">후속 실연동 API·DB 제안은 문서 → 입력·서버·DB 탭</p></div>';
+        return h;
+      })() +
+      '<div><h5>구성</h5><ul>' + s.parts.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' +
+      '<div><h5>상태</h5><ul>' + s.states.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' +
+      '<div><h5>규칙</h5><ul>' + s.rules.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div>' +
+      '<div><h5>연관 예외 <span>' + s.ex.length + '</span></h5><div class="fl">' + s.ex.map((id) => { const x = EXM[id]; return '<div><b>' + id + '</b><span>' + esc(x ? x.sit : '') + ' <span class="chip ' + (x && x.pri === 'P0' ? 'high' : '') + '">' + esc(x ? x.pri : '') + '</span><small>' + esc(x ? x.how : '') + '</small></span></div>'; }).join('') + '</div></div>' +
+      '<div><h5>검수 시나리오 <span>' + s.at.length + '</span></h5><div class="fl">' + s.at.map((id) => { const x = ATM[id]; return '<div><b>' + id + '</b><span>' + esc(x ? x.how : '') + '</span></div>'; }).join('') + '</div></div>' +
+      '<div><h5>나가는 연결 <span>' + outs.length + '</span></h5>' + (uniq(outs, (e) => e.t + e.label).map((e) => link(e, 'out')).join('') || '<p style="margin:0">없음</p>') + '</div>' +
+      '<div><h5>들어오는 연결 <span>' + ins2.length + '</span></h5>' + (uniq(ins2, (e) => e.f + e.label).map((e) => link(e, 'in')).join('') || '<p style="margin:0">없음 · 사이드 메뉴로 진입</p>') + '</div>';
+    ins.querySelectorAll('[data-to]').forEach((b) => b.addEventListener('click', () => { select(b.dataset.to); focus(b.dataset.to); }));
+    $('insPlay').onclick = () => openProto(sel); $('insFocus').onclick = () => focus(sel); $('insSb').onclick = () => window.openSB(sel);
+    if (scrollUx && $('insUxBox')) $('insUxBox').scrollIntoView({ block: 'start' });
+  }
+  function select(id, ux) {
+    sel = id; selEdge = null;
+    Object.keys(frames).forEach((k) => frames[k].el.classList.toggle('sel', k === id));
+    highlight(); renderLeft(); renderIns(ux); drawMini();
+    if (id && window.matchMedia('(max-width: 900px)').matches && ux) app.classList.add('show-right');
+  }
+
+  // ---------- 툴바 ----------
+  document.querySelectorAll('[data-layer]').forEach((b) => b.addEventListener('click', () => {
+    const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on));
+    const L = b.dataset.layer;
+    if (L === 'hs') app.classList.toggle('show-hs', on); else app.classList.toggle('hide-' + L, !on);
+  }));
+  document.querySelectorAll('#edgeMode button').forEach((b) => { b.setAttribute('aria-pressed', String(b.dataset.em === edgeMode)); b.addEventListener('click', () => setEdgeMode(b.dataset.em)); });
+  $('zoomIn').onclick = () => { const r = stage.getBoundingClientRect(); zoomAt(1.25, r.width / 2, r.height / 2); };
+  $('zoomOut').onclick = () => { const r = stage.getBoundingClientRect(); zoomAt(0.8, r.width / 2, r.height / 2); };
+  $('zoomVal').onclick = () => { const r = stage.getBoundingClientRect(); zoomAt(1 / sc, r.width / 2, r.height / 2); };
+  $('fitAll').onclick = fitAll;
+  $('play').onclick = () => openProto(sel || 'D1');
+  $('openDocs').onclick = () => openDocs('log');
+  $('btnLeft').onclick = () => { app.classList.toggle('show-left'); app.classList.remove('show-right'); };
+  $('btnRight').onclick = () => { app.classList.toggle('show-right'); app.classList.remove('show-left'); };
+
+  // ---------- 프로토타입 ----------
+  let pHist = [], pCur = null;
+  function pScale() {
+    const v = $('pView'), W = Math.min(window.innerWidth - 32, 1440), Hh = window.innerHeight - 130;
+    const k = Math.min(W / FW, Hh / FH); v.style.width = FW * k + 'px'; v.style.height = FH * k + 'px';
+    const inner = v.firstChild; if (inner) inner.style.transform = 'scale(' + k + ')';
+  }
+  function pShow(id) {
+    pCur = id; const v = $('pView'); v.innerHTML = '<div class="pin-scr">' + H[id]() + '</div>';
+    $('pTitle').innerHTML = '<small>' + id + '</small>' + esc(byId[id].title); pScale();
+  }
+  function openProto(id) { pHist = []; $('proto').hidden = false; pShow(id); }
+  function closeProto() { $('proto').hidden = true; $('pView').innerHTML = ''; }
+  $('pView').addEventListener('click', (e) => {
+    const g = e.target.closest('[data-go],[data-nav]');
+    const t = g && (g.dataset.go || g.dataset.nav);
+    if (t && H[t]) { pHist.push(pCur); pShow(t); return; }
+    const v = $('pView'); v.classList.add('flash'); setTimeout(() => v.classList.remove('flash'), 450);
+  });
+  $('pBack').onclick = () => { if (pHist.length) pShow(pHist.pop()); };
+  $('pRestart').onclick = () => { pHist = []; pShow('D1'); };
+  $('pClose').onclick = closeProto;
+  $('pShow').onclick = () => { const id = pCur; closeProto(); select(id); focus(id); };
+
+  // ---------- 문서 패널 ----------
+  const TABS = [['log', '변경 이력'], ['wbs', 'WBS · 공수'], ['feat', '기능 ' + DOC.features.length], ['rtm', '요구 추적표'], ['ex', '예외 ' + DOC.ex.length], ['at', '검수 ' + DOC.at.length], ['data', '입력 · 서버 · DB'], ['risk', '리스크']];
+  // 문서 패널 문구 · 강조 표시는 프로젝트 설정(PROJECT.docs)에서 받는다
+  const DOCS = PROJECT.docs || {};
+  const LATEST = DOCS.latest || (DOC.log.length ? DOC.log[DOC.log.length - 1].ver : '');
+  let fieldFilter = 'all';
+  let docTab = 'log', exFilter = 'all';
+  const NEW_WBS = DOCS.wbsNew || {}, CHG_WBS = DOCS.wbsChanged || {};
+  const NEW_EX = DOCS.exNew || {};
+  function table(head, rows) { return '<div class="tbl"><table><thead><tr>' + head.map((h) => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>' + rows.join('') + '</tbody></table></div>'; }
+  function renderDocs() {
+    $('docsTabs').innerHTML = TABS.map((t) => '<button data-tab="' + t[0] + '" aria-selected="' + (t[0] === docTab) + '">' + t[1] + '</button>').join('');
+    $('docsTabs').querySelectorAll('button').forEach((b) => b.onclick = () => { docTab = b.dataset.tab; renderDocs(); });
+    const B = $('docsBody'); let h = '';
+    if (docTab === 'log') {
+      h = '<h2>' + esc(DOCS.logTitle || ('v' + LATEST + ' 변경 이력')) + '</h2>' + (DOCS.logLead ? '<p class="lead">' + DOCS.logLead + '</p>' : '') +
+        table(['버전', '변경', '근거'], DOC.log.map((r) => '<tr' + (r.ver === LATEST ? ' class="new"' : '') + '><td class="mono">' + esc(r.ver) + '</td><td>' + esc(r.what) + '</td><td>' + esc(r.why) + '</td></tr>')) +
+        '<h2>검토 이슈 ' + ISSUES.length + '건</h2>' + table(['ID', '심각도', '이슈', '보완', '상태'], ISSUES.map((u) => '<tr><td class="mono">' + u.id + '</td><td><span class="chip ' + u.sev + '">' + SEV[u.sev] + '</span></td><td><b>' + esc(u.t) + '</b><br><span style="color:var(--fg-3)">' + esc(u.src) + ' · ' + (u.scr || '문서 전체') + '</span></td><td>' + esc(u.fx) + (u.rest ? '<br><span style="color:var(--mid)">남은 일 · ' + esc(u.rest) + '</span>' : '') + '</td><td><span class="chip ' + ST[u.st][0] + '">' + ST[u.st][1] + '</span></td></tr>'));
+    } else if (docTab === 'wbs') {
+      const base = DOC.wbsBase, cond = DOC.wbs.filter((r) => r.days.startsWith('(')).reduce((a, r) => a + parseFloat(r.days.replace(/[()]/g, '')), 0);
+      const ph = {}; DOC.wbs.forEach((r) => { const k = r.id.split('.')[0]; const v = parseFloat(r.days.replace(/[()]/g, '')); ph[k] = ph[k] || { b: 0, add: 0, cond: 0 }; if (r.days.startsWith('(')) ph[k].cond += v; else { ph[k].b += v; } });
+      const ADD = DOCS.wbsAdded || {};
+      const PN = new Proxy(DOCS.wbsPhases || {}, { get: (o, k) => o[k] || (k + '단계') });
+      const mx = Math.max(...Object.values(ph).map((p) => p.b + p.cond));
+      h = '<h2>WBS · 공수</h2><p class="lead">' + (DOCS.wbsLead || '1인일은 담당자 1명이 1일 작업하는 양입니다. 추정치이며 견적 확정값이 아닙니다.') + '</p>' +
+        '<div class="kpis"><div class="kpi"><span>기준 합계</span><b>' + base.toFixed(1) + '인일</b><small>' + esc(DOCS.wbsBaseNote || '괄호 작업 제외') + '</small></div><div class="kpi"><span>여유 20~30% 포함</span><b>' + (base * 1.2).toFixed(1) + '~' + (base * 1.3).toFixed(1) + '</b><small>인일</small></div><div class="kpi"><span>' + esc(DOCS.condLabel || '조건부 작업') + '</span><b>+' + cond.toFixed(1) + '</b><small>' + esc(DOCS.condNote || '결정 후 수행') + '</small></div><div class="kpi"><span>작업 수</span><b>' + DOC.wbs.length + '</b><small>' + esc(DOCS.taskNote || ('신규 ' + Object.keys(NEW_WBS).length + ' · 보강 ' + Object.keys(CHG_WBS).length)) + '</small></div></div>' +
+        '<div class="bars">' + Object.keys(ph).map((k) => { const p = ph[k], a = ADD[k] || 0; return '<div><span>' + PN[k] + '</span><span class="bartrack"><i style="width:' + ((p.b - a) / mx * 100) + '%"></i>' + (a ? '<i class="add" style="width:' + (a / mx * 100) + '%"></i>' : '') + (p.cond ? '<i style="width:' + (p.cond / mx * 100) + '%;background:transparent;box-shadow:inset 0 0 0 1.5px var(--mid)"></i>' : '') + '</span><em>' + p.b.toFixed(1) + (p.cond ? '+(' + p.cond + ')' : '') + '</em></div>'; }).join('') + '</div>' +
+        '<div class="legend"><span><i style="background:var(--accent)"></i>' + esc(DOCS.legendBase || '기존 공수') + '</span><span><i style="background:var(--mid)"></i>' + esc(DOCS.legendAdd || '추가 · 보강') + '</span><span><i style="box-shadow:inset 0 0 0 1.5px var(--mid)"></i>조건부</span></div>' +
+        table(['WBS', '작업', '기능 ID', '산출물·완료 조건', '선행', '담당', '인일'], DOC.wbs.map((r) => '<tr class="' + (NEW_WBS[r.id] ? 'new' : '') + (r.days.startsWith('(') ? ' cond' : '') + '"><td class="mono">' + r.id + '</td><td><b>' + esc(r.task) + '</b>' + (NEW_WBS[r.id] ? ' <span class="chip acc">' + esc(DOCS.newChip || '신규') + '</span>' : '') + (CHG_WBS[r.id] ? ' <span class="chip mid">' + CHG_WBS[r.id] + '</span>' : '') + '</td><td class="mono">' + esc(r.feat) + '</td><td>' + esc(r.out) + '</td><td class="mono">' + esc(r.dep) + '</td><td>' + esc(r.role) + '</td><td class="num">' + esc(r.days) + '</td></tr>').concat(['<tr class="tot"><td></td><td>기준 합계</td><td></td><td>' + esc(DOCS.condExcluded || '조건부 제외') + '</td><td></td><td></td><td class="num">' + base.toFixed(1) + '</td></tr>']));
+    } else if (docTab === 'feat') {
+      const groups = [...new Set(DOC.features.map((f) => f.group))];
+      h = '<h2>기능 목록</h2><p class="lead">' + (DOCS.featLead || 'E 기존 유지 · U UI 구현 · D 고정 데이터 · C 조건부 재사용 · F 후속 실연동(이번 제외).') + '</p>' + groups.map((g) => '<h3 style="margin:18px 0 8px;font-size:15px">' + esc(g) + '</h3>' + table(['ID', '기능', '구현', '내용', '화면'], DOC.features.filter((f) => f.group === g).map((f) => '<tr><td class="mono">' + f.id + '</td><td><b>' + esc(f.name) + '</b></td><td class="mono">' + esc(f.impl) + '</td><td>' + esc(f.desc) + '</td><td class="mono">' + SCREENS.filter((s) => s.feat.indexOf(f.id) >= 0).map((s) => s.id).join(', ') + '</td></tr>'))).join('');
+    } else if (docTab === 'rtm') {
+      h = '<h2>요구 추적표</h2><p class="lead">' + (DOCS.rtmLead || '원본 요구 항목이 어느 기능 ID로, 어떤 수준으로 처리되는지 보여 줍니다.') + '</p>' + table(['원본', '요구 항목', '기능 ID', '이번 처리'], DOC.rtm.map((r) => '<tr><td class="mono">' + esc(r.src) + '</td><td>' + esc(r.req) + '</td><td class="mono">' + esc(r.ids) + '</td><td>' + esc(r.how) + '</td></tr>'));
+    } else if (docTab === 'ex') {
+      const list = DOC.ex.filter((x) => exFilter === 'all' || x.pri === exFilter);
+      h = '<h2>예외 처리 ' + DOC.ex.length + '건</h2><p class="lead">' + (DOCS.exLead || 'P0 데이터 오염 · 오인 · 유실 방지 · P1 핵심 흐름 · 일관성 · P2 편의.') + '</p>' +
+        '<div class="filter">' + ['all', 'P0', 'P1', 'P2'].map((p) => '<button data-f="' + p + '" aria-pressed="' + (exFilter === p) + '">' + (p === 'all' ? '전체 ' + DOC.ex.length : p + ' ' + DOC.ex.filter((x) => x.pri === p).length) + '</button>').join('') + '</div>' +
+        table(['ID', '상황', '처리', '우선', '검수', '화면'], list.map((x) => { const n = +x.id.slice(3); const ats = DOC.at.filter((a) => a.ex.split(',').some((p) => { p = p.trim(); if (p.indexOf('~') > 0) { const q = p.split('~'); return n >= +q[0] && n <= +q[1]; } return +p === n; })).map((a) => a.id); return '<tr' + (NEW_EX[x.id] ? ' class="new"' : '') + '><td class="mono">' + x.id + '</td><td>' + esc(x.sit) + '</td><td>' + esc(x.how) + '</td><td><span class="chip ' + (x.pri === 'P0' ? 'high' : x.pri === 'P1' ? 'mid' : '') + '">' + x.pri + '</span></td><td class="mono">' + ats.join(', ') + '</td><td class="mono">' + SCREENS.filter((s) => s.ex.indexOf(x.id) >= 0).map((s) => s.id).join(', ') + '</td></tr>'; }));
+    } else if (docTab === 'at') {
+      h = '<h2>검수 시나리오</h2><p class="lead">' + (DOCS.atLead || '검수 시나리오와 연결된 예외입니다.') + '</p>' + table(['ID', '대상 기능', '절차·기대 결과', '연관 예외', '우선'], DOC.at.map((x) => '<tr><td class="mono">' + x.id + '</td><td class="mono">' + esc(x.feat) + '</td><td>' + esc(x.how) + '</td><td class="mono">' + esc(x.ex) + '</td><td><span class="chip ' + (x.pri === 'P0' ? 'high' : 'mid') + '">' + x.pri + '</span></td></tr>'));
+    } else if (docTab === 'data') {
+      const scrs = [...new Set(DOC.fields.map((f) => f.scr))];
+      const fl = DOC.fields.filter((f) => fieldFilter === 'all' || f.scr === fieldFilter);
+      const srvN = DOC.proc.filter((p) => /서버/.test(p.where)).length;
+      h = '<h2>입력값 · 서버 처리 · DB</h2><p class="lead">' + (PROJECT.dataLead || '상세명세 12장. 신규 기능의 입력 필드, 처리 위치, 기존 서버 연동 경계, 후속 API · DB 제안입니다.') + '</p>' +
+        '<div class="kpis"><div class="kpi"><span>입력 필드</span><b>' + DOC.fields.length + '</b><small>신규 · 확장 화면</small></div><div class="kpi"><span>브라우저 처리 기능</span><b>' + (DOC.proc.length - srvN) + '</b><small>운영 DB 영향 없음</small></div><div class="kpi"><span>서버 관여 (기존 흐름)</span><b>' + srvN + '</b><small>변경 없음 · 읽기 · 메뉴 등록</small></div><div class="kpi"><span>후속 API · 테이블 제안</span><b>' + DOC.apis.length + ' · ' + DOC.tables.length + '</b><small>F · 이번 미구현</small></div></div>' +
+        '<h3 style="margin:18px 0 8px;font-size:15px">12.1 기능별 처리 위치</h3>' + table(['기능', '입력', '처리 위치', '저장 · 조회 대상', '운영 서버 · DB 영향'], DOC.proc.map((p) => '<tr><td class="mono">' + esc(p.feat) + '</td><td>' + esc(p.input) + '</td><td>' + whereChip(p.where) + '</td><td>' + esc(p.target) + '</td><td>' + esc(p.impact) + '</td></tr>')) +
+        '<h3 style="margin:18px 0 8px;font-size:15px">12.2 입력 필드</h3><div class="filter">' + ['all'].concat(scrs).map((k) => '<button data-ff="' + k + '" aria-pressed="' + (fieldFilter === k) + '">' + (k === 'all' ? '전체 ' + DOC.fields.length : k + ' ' + DOC.fields.filter((f) => f.scr === k).length) + '</button>').join('') + '</div>' +
+        table(['화면', '필드', '키', '타입', '필수', '검증', '기본값', '저장 위치'], fl.map((f) => '<tr><td class="mono">' + esc(f.scr) + '</td><td><b>' + esc(f.label) + '</b></td><td class="mono">' + esc(f.key) + '</td><td>' + esc(f.type) + '</td><td><span class="chip ' + (f.req === '필수' ? 'acc' : '') + '">' + esc(f.req) + '</span></td><td>' + esc(f.rule) + '</td><td class="mono">' + esc(f.def) + '</td><td class="mono" style="white-space:normal">' + esc(f.store) + '</td></tr>')) +
+        '<h3 style="margin:18px 0 8px;font-size:15px">12.3 기존 서버 연동 경계</h3>' + table(['연동', '흐름', '경로', '확인 상태', '이번 처리'], DOC.links.map((l) => '<tr><td><b>' + esc(l.name) + '</b></td><td>' + esc(l.flow) + '</td><td class="mono" style="white-space:normal">' + esc(l.path) + '</td><td>' + esc(l.state) + '</td><td>' + esc(l.how) + '</td></tr>')) +
+        '<h3 style="margin:18px 0 8px;font-size:15px">12.4 후속 실연동 API 제안 <span class="chip mid">F · 이번 미구현</span></h3>' + table(['기능', '메서드 · 경로 (제안)', '요청', '응답', '규칙'], DOC.apis.map((a) => '<tr><td><b>' + esc(a.name) + '</b></td><td class="mono" style="white-space:normal">' + esc(a.path) + '</td><td>' + esc(a.req) + '</td><td class="mono" style="white-space:normal">' + esc(a.res) + '</td><td>' + esc(a.rule) + '</td></tr>')) +
+        '<h3 style="margin:18px 0 8px;font-size:15px">12.5 후속 DB 테이블 제안 <span class="chip mid">F · MariaDB · 이번 미구현</span></h3>' + table(['테이블 (제안)', '주요 컬럼', '키 · 관계', '비고'], DOC.tables.map((t) => '<tr><td class="mono"><b>' + esc(t.name) + '</b></td><td class="mono" style="white-space:normal">' + esc(t.cols) + '</td><td>' + esc(t.keys) + '</td><td>' + esc(t.note) + '</td></tr>')) +
+        '<h3 style="margin:18px 0 8px;font-size:15px">12.6 서버 처리 규칙 (후속 실연동 시)</h3><ul style="margin:0;padding-left:20px;display:grid;gap:4px;color:var(--fg-2);max-width:80ch">' + DOC.srv.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>';
+    } else {
+      h = '<h2>리스크와 대체 방안</h2>' + table(['ID', '리스크', '대응·완료 가능한 대체'], DOC.risks.map((r) => '<tr' + (/WR-1[01]/.test(r.id) ? ' class="new"' : '') + '><td class="mono">' + r.id + '</td><td><b>' + esc(r.risk) + '</b></td><td>' + esc(r.fix) + '</td></tr>'));
+    }
+    B.innerHTML = '<section>' + h + '</section>'; B.scrollTop = 0;
+    B.querySelectorAll('[data-f]').forEach((b) => b.onclick = () => { exFilter = b.dataset.f; renderDocs(); });
+    B.querySelectorAll('[data-ff]').forEach((b) => b.onclick = () => { fieldFilter = b.dataset.ff; renderDocs(); });
+  }
+  function openDocs(tab) { docTab = tab || docTab; $('docs').hidden = false; renderDocs(); $('docsClose').focus(); }
+  $('docsClose').onclick = () => { $('docs').hidden = true; };
+
+  // ---------- 화면설계서(SB) ----------
+  // 관리자 SB 형식: 머리줄(관리자 · 화면 경로) → 화면(빨간 번호) → Description(번호별 요소 · 규칙 · [예외] · 데이터) → 하위 번호 상태 예시 → 판정표 페이지.
+  // 문구 토큰: {저장} {서버} {기존} {조건부} {EX-nn} {→화면ID} {→SB-nn}, "문구"는 화면 문구, '- '는 2단 항목, '[..]'는 소제목.
+  const SBP = [];
+  const pg = (o) => { o.no = 'SB-' + String(SBP.length).padStart(2, '0'); SBP.push(o); return o; };
+  const mk = (n, q, t, b, o) => Object.assign({ n: n, q: q, t: t, b: b }, o || {});
+
+  const SW = (title, text, btns) => '<div class="sw">' + (title ? '<h5>' + title + '</h5>' : '') + '<div>' + text + '</div><div class="bt">' + (btns || ['확인']).map((b) => '<span' + (b[0] === '~' ? ' class="s"' : b[0] === '!' ? ' class="d"' : '') + '>' + b.replace(/^[~!]/, '') + '</span>').join('') + '</div></div>';
+  const FX = (label, val, o) => { o = o || {}; return '<div class="fx"><div class="lab">' + label + (o.req ? ' <em>*</em>' : '') + '</div><div class="in' + (o.err ? ' err' : '') + (o.ph ? ' ph' : '') + '">' + val + '</div>' + (o.m ? '<div class="m ' + (o.mc || '') + '">' + o.m + '</div>' : '') + '</div>'; };
+  const TST = (t) => '<div class="fx" style="border:0;padding:0"><div class="tst"><span style="color:#10B759;font-weight:800">✓</span><span>' + t + '</span></div></div>';
+
+  // 표준 문서 페이지: 프로젝트 sb-pages.js 맨 앞에서 pgDocs()를 부른다
+  function pgDocs(o) {
+    o = o || {};
+    pg({ kind: 'doc', id: 'cover', title: '표지 · 목차', path: o.coverPath || '화면설계서', render: () => sbCover() });
+    pg({ kind: 'doc', id: 'ref', title: o.refTitle || '작성 기준', path: o.refPath || '화면설계서 문법', render: () => sbRef() });
+    pg({ kind: 'doc', id: 'flow', title: '메뉴 구조 · 화면 흐름', path: '메뉴 · 화면 전이 · 업무 흐름', render: () => sbFlow() });
+    pg({ kind: 'doc', id: 'dict', title: '상태값 · 공통 문구', path: '화면 사이에서 이어지는 상태값과 문구', render: () => sbDict() });
+  }
+  // 지도 표현 기준 · 최종 검증: 원하는 위치에서 부르고, 안 부르면 맨 뒤에 자동으로 붙는다
+  const pgMap = () => pg({ kind: 'doc', id: 'map', title: '지도 표현 기준', path: '공통 > 지도 그리기 (상세명세 13장)', render: () => sbMap() });
+  const pgVerify = () => pg({ kind: 'doc', id: 'verify', title: '최종 검증', path: '요구사항 · 문서 · 화면 정합 검증', render: () => sbVerify() });
+
+  // =====================================================================
+  // 화면설계서(SB) 페이지 — 가상 예시: 푸른숲공원 예약 관리
+  // =====================================================================
+  const SBCONF = {
+    cover: {
+      badge: '추가개발 v1.1 · 2026-10-20 · 가상 예시',
+      titleHTML: '푸른숲공원 예약 관리<br>추가개발 화면설계서 (SB)',
+      intro: '기존 공원 관리자 사이트에 시설 관리 · 예약 관리 메뉴를 더하는 범위입니다. 실제 기관 · 서비스와 관계없는 시연용 예시입니다.',
+      sources: ['docs/추가개발-기능정의서.md', 'docs/추가개발-상세명세.md', 'docs/추가개발-WBS.md', '원본: 요청서 · 기획서 (가상)'],
+      history: [['v1.0', '2026-10-14', '최초 작성'], ['v1.1', '2026-10-20', '위치 지도 선택 · 반려 사유 필수 · 동시 처리 예외']]
+    },
+    menus: [['M10', '대시보드', '카드 · 지도 추가', 'D1', 'old'], ['M20', '시설 관리', '신규 등록', 'F1 · F2', 'new'], ['M30', '예약 관리', '신규 등록', 'B1 · B2', 'new']],
+    menuNote: '메뉴 코드는 기능정의서 5장 제안값입니다.',
+    journeys: [
+      { t: 'A. 시설 등록', nodes: [{ id: 'F1', s: '+ 시설 등록' }, { e: '빈 폼' }, { id: 'F2', s: '정보 입력 · 지도에서 위치', k: 'save' }, { e: '시설 ID' }, { id: 'F1', s: '목록 · 지도에 반영' }] },
+      { t: 'B. 예약 처리', nodes: [{ id: 'D1', s: '승인 대기 카드' }, { e: '상태 필터' }, { id: 'B1', s: '예약 선택' }, { e: '예약 ID' }, { id: 'B2', s: '승인 또는 반려(사유)', k: 'save' }] }
+    ],
+    dict: {
+      rows: [['시설 상태', '운영 · 점검 중', '점검 중이면 예약 화면에서 숨김', 'F2', 'F1 · D1'], ['예약 상태', '승인 대기 · 승인 · 반려', '반려에는 사유가 붙음', 'B2', 'B1 · D1']],
+      msgs: [['저장 성공', '저장했습니다.', '1.1'], ['위치 미선택', '지도에서 위치를 고르세요.', 'EX-03'], ['반려 사유 공백', '반려 사유를 입력하세요.', 'EX-04'], ['이미 처리됨', '이미 처리된 예약입니다.', 'EX-05']]
+    },
+    swatches: {},
+    mapIntro: '공원 경계 안에서만 시설을 보여 주고 고릅니다.', mapNote: '',
+    screenAlias: {},
+    crossFeatures: { 'COM-01': '모든 신규 화면의 사이드 메뉴 · 브레드크럼' },
+    fieldAliases: {},
+    fieldPass: () => false,
+    forbidden: /시연용 배지|\(예시\)/,
+    forbiddenExempt: {},
+    instructions: () => [['시설 위치는 지도에서만 고른다', 'F2 · FAC-03 · EX-03'], ['반려 시 사유를 받는다', 'B2 · BOOK-02 · EX-04']],
+    openItems: ['예약 API의 상태 확인(409) 응답 형식 — 운영팀 확인']
+  };
+
+  pgDocs({ coverPath: '추가개발 화면설계서' });
+
+  pg({ kind: 'scr', scr: 'D1', title: '대시보드', path: '대시보드', tag: 'old', tagT: '기존 개편',
+    marks: [
+      mk('1', '$.ct > :nth-child(2)', '현황 카드', ['오늘 예약 · 승인 대기 → 클릭 {→B1}', '점검 중 시설 → 클릭 {→F1}', '{서버} 예약 목록과 같은 기준으로 집계']),
+      mk('2', '^시설 위치', '시설 위치 지도', ['운영 초록 · 점검 중 회색 핀', '[예외]', '지도 로드 실패: 안내 후 카드 유지 {EX-01}']),
+      mk('3', '^승인 대기 예약', '승인 대기 예약', ['가까운 이용일 순 3건', '확인 → {→B2}', '0건: "처리할 예약이 없습니다."']) ],
+    ctx: [['읽는 데이터', '{서버} reservation · facility']] });
+
+  pg({ kind: 'scr', scr: 'F1', title: '시설 목록 · 지도', path: '시설 관리', tag: 'new', tagT: '신규',
+    marks: [
+      mk('1', '+ 시설 등록', '시설 등록', ['→ {→F2} 빈 폼']),
+      mk('2', '^시설 지도', '시설 지도', ['핀 클릭 → 그 시설 수정 {→F2}']),
+      mk('3', '시설명 검색', '검색', ['시설명 일부 일치', '[예외]', '0건: "검색 결과가 없습니다." {EX-06}']),
+      mk('4', '$.row > .c:last-child table', '시설 목록', ['열: 시설명 · 유형 · 수용 · 상태 · 관리', '수정 → {→F2}']) ] });
+
+  pg({ kind: 'scr', scr: 'F2', title: '시설 등록 · 위치 선택', path: '시설 관리 > 등록', tag: 'new', tagT: '신규',
+    marks: [
+      mk('1', '시설명', '시설명', ['필수 *, 1~50자', '[예외]', '중복: "같은 이름의 시설이 있습니다." {EX-07}'], { up: 1 }),
+      mk('2', '수용 인원', '수용 인원', ['필수 *, 1~999', '[예외]', '0 이하: "1 이상의 숫자를 입력하세요." {EX-02}'], { up: 1 }),
+      mk('3', '운영 상태', '운영 상태', ['운영 · 점검 중, 디폴트 운영', '점검 중이면 시민 예약 화면에서 숨김'], { up: 1 }),
+      mk('4', '^위치 선택', '위치 선택 지도', ['지도 클릭으로만 위치를 고른다(좌표 입력 없음)', '공원 밖 클릭은 받지 않음', '[예외]', '미선택 저장: "지도에서 위치를 고르세요." {EX-03}']),
+      mk('5', '취소', '버튼', ['취소 → {→F1}', '{서버} 저장 → 기존 시설 API → 목록 {→F1}'], { up: 1 }) ],
+    subs: [{ n: '2-1', cap: '수용 인원 0', html: FX('수용 인원', '0', { req: 1, err: 1, m: '1 이상의 숫자를 입력하세요.', mc: 'err' }) }, { n: '5-1', cap: '저장 성공', html: TST('저장했습니다.') }],
+    ctx: [['쓰는 데이터', '{서버} facility'], ['읽는 곳', 'F1 · D1']] });
+
+  pg({ kind: 'scr', scr: 'B1', title: '예약 목록', path: '예약 관리', tag: 'new', tagT: '신규',
+    marks: [
+      mk('1', '$.seg', '상태 탭', ['전체 · 승인 대기 · 승인 · 반려, 디폴트 승인 대기']),
+      mk('2', '예약 번호 · 신청자 검색', '검색', ['예약 번호 · 신청자 이름', '[예외]', '0건 {EX-06}']),
+      mk('3', '$.ct table', '예약 목록', ['상세 → {→B2}']) ] });
+
+  pg({ kind: 'scr', scr: 'B2', title: '예약 상세 · 승인/반려', path: '예약 관리 > 상세', tag: 'new', tagT: '신규',
+    marks: [
+      mk('1', '$.modal table', '예약 정보', ['신청자 연락처는 가운데 4자리 가림']),
+      mk('2', '반려 사유', '반려 사유', ['반려할 때만 필수, 200자 이하', '[예외]', '공백 반려: "반려 사유를 입력하세요." {EX-04}'], { up: 1 }),
+      mk('3', '$.modal .foot', '반려 · 승인', ['{서버} 저장 직전 상태 재확인', '[예외]', '이미 처리됨: "이미 처리된 예약입니다." 목록 새로고침 {EX-05}', '처리 후 → {→B1}']) ],
+    subs: [{ n: '2-1', cap: '사유 공백', html: FX('반려 사유', '', { err: 1, m: '반려 사유를 입력하세요.', mc: 'err' }) }, { n: '3-1', cap: '반려 확인', html: SW('예약 반려', '반려하면 신청자에게 사유가 안내됩니다.', ['~취소', '!반려']) }],
+    ctx: [['쓰는 데이터', '{서버} reservation.status · reject_reason'], ['읽는 곳', 'B1 · D1']] });
+
+  pg({ kind: 'mx', scr: 'B2', title: '예약 처리 판정표', path: '예약 관리 > 예외 처리', purpose: '버튼 · 현재 상태 · 사유 조합별 결과입니다.',
+    mx: [{ n: '1', t: '승인 · 반려 조합', cols: ['버튼', '현재 상태', '반려 사유', '결과', '문구'],
+      rows: [['승인', '승인 대기', '-', 'O', '"저장했습니다."'], ['반려', '승인 대기', '입력', 'O', '"저장했습니다."'], ['반려', '승인 대기', '공백', 'X', '"반려 사유를 입력하세요." (EX-04)'], ['승인 · 반려', '이미 처리됨', '-', 'X', '"이미 처리된 예약입니다." (EX-05)']],
+      note: '현재 상태는 저장 직전에 서버에서 다시 읽은 값입니다.' }] });
+
+  // ===== 엔진 =====
+
+  // ===== 표준 페이지 (SBCONF로 프로젝트 값을 받는다) =====
+  if (!SBP.some((p) => p.id === 'map') && DOC.map && DOC.map.sym && DOC.map.sym.length) pgMap();
+  if (!SBP.some((p) => p.id === 'verify')) pgVerify();
+  const CONF = (typeof SBCONF !== 'undefined' && SBCONF) || {};
+  const sbGroups = () => [['문서', (p) => p.kind === 'doc'], ['공통', (p) => !!p.common]].concat(FLOWS.map((f) => [f.no + ' ' + f.title, (p) => p.scr && !p.common && byId[p.scr] && byId[p.scr].flow === f.id]));
+  const HOWTO = '<div class="bx" style="margin-top:12px"><h3>읽는 법</h3><ul><li><span class="rt">빨간 번호</span>는 화면 요소와 오른쪽 Description 항목을 잇습니다. 번호나 항목에 마우스를 올리면 서로 강조됩니다.</li><li><b>5-1</b>처럼 붙은 번호는 그 요소를 눌렀을 때 나오는 팝업 · 알림 · 오류 상태입니다.</li><li>조합이 많은 예외는 <b>판정표 페이지</b>로 따로 둡니다.</li><li><span class="tk save">저장</span> 브라우저 저장 · <span class="tk srv">서버</span> 기존 서버 · DB 처리 · <span class="tk old">기존 유지</span> 바꾸지 않음 · <span class="tk cond">조건부</span> 결정 후 · <span class="tk ex">EX-nn</span> 상세명세 예외 · <span class="tk go">→ 화면</span> 이어지는 페이지</li><li>페이지 아래 <b>들어오는 곳 · 나가는 곳</b>은 시안의 버튼 연결에서 자동으로 뽑았습니다.</li></ul></div>';
+  function sbCover() {
+    const C = CONF.cover || {};
+    return '<div class="cover"><div>' + (C.badge ? '<div class="sh-chip new" style="margin-bottom:8px">' + esc(C.badge) + '</div>' : '') + '<div class="ttl">' + (C.titleHTML || esc(PROJECT.title) + '<br>화면설계서 (SB)') + '</div>' + (C.intro ? '<p>' + C.intro + '</p>' : '') +
+      (C.sources && C.sources.length ? '<div class="bx" style="margin-top:12px"><h3>근거 문서</h3><ul>' + C.sources.map((s) => '<li>' + esc(s) + '</li>').join('') + '</ul></div>' : '') + HOWTO + '</div>' +
+      '<div><div class="bx"><h3>목차</h3>' + sbGroups().map((g) => { const ps = SBP.filter(g[1]); return ps.length ? '<div style="margin:6px 0 2px;font-weight:700">' + esc(g[0]) + '</div>' + ps.map((p) => '<div style="display:flex;gap:8px;padding:2px 0;cursor:pointer" data-sb="' + p.i + '"><span style="font-family:var(--mono);color:#888;width:46px">' + p.no + '</span><span>' + (p.kind === 'mx' ? '└ ' : '') + esc(p.title) + '</span></div>').join('') : ''; }).join('') + '</div>' +
+      (C.history && C.history.length ? '<div class="bx" style="margin-top:12px"><h3>개정 이력</h3><table class="mxt"><tr><th>버전</th><th>일자</th><th>내용</th></tr>' + C.history.map((h) => '<tr><td>' + esc(h[0]) + '</td><td>' + esc(h[1]) + '</td><td class="l">' + rt(h[2]) + '</td></tr>').join('') + '</table></div>' : '') + '</div></div>';
+  }
+  function sbRef() {
+    if (CONF.ref) return CONF.ref();
+    return '<h2>화면설계서 한 페이지의 문법</h2><div class="cols"><div class="bx"><h3>구성</h3><ol><li>머리줄 <b>관리자 | 화면 경로</b></li><li>왼쪽 실제 화면 위에 빨간 번호. 묶음 요소는 상자로 감쌈</li><li>오른쪽 <b>Description</b>: 번호마다 “N. 요소명” 아래 구성 → 입력 규칙(placeholder · 자릿수 · 형식 · 기본값) → 동작(누르면 결과) → [예외] 정확한 문구 → 데이터(저장 · 서버 · DB)</li><li>팝업 · 알림 · 오류 상태는 같은 페이지에 <b>하위 번호</b>(5-1, 6-2)로 붙임</li></ol></div>' +
+      '<div class="bx"><h3>예외와 맥락</h3><ol><li>본 화면에는 [예외]로 요약, 조합이 많으면 <b>판정표 페이지</b>로 펼침 (입력 O/X × 조건 → 결과 · 문구)</li><li>문구는 마침표까지 그대로 적음</li><li>한 화면에서 만든 상태값 · 값이 다른 화면에 같은 이름으로 다시 나오게 함 → 상태값 사전 · 업무 흐름 페이지</li><li>범위 밖 기능은 배지로 표시</li></ol></div></div>';
+  }
+  function sbFlow() {
+    const ch = (nodes) => '<div class="chain">' + nodes.map((n) => n.e ? '<div class="ed">' + esc(n.e) + '<i>→</i></div>' : '<div class="nd" data-scr="' + n.id + '" style="cursor:pointer"><b>' + n.id + ' ' + esc(byId[n.id] ? byId[n.id].title : '') + '</b><small>' + esc(n.s || '') + '</small>' + (n.k ? '<span class="tk ' + n.k + '">' + (n.k === 'save' ? '저장' : '서버') + '</span>' : '') + '</div>').join('') + '</div>';
+    const M = CONF.menus || [], J = CONF.journeys || [];
+    return (M.length ? '<h2>메뉴 구조</h2><table class="mxt"><tr><th>메뉴 코드</th><th>메뉴명</th><th>이번 변경</th><th>화면</th></tr>' + M.map((m) => '<tr><td style="font-family:var(--mono)">' + esc(m[0]) + '</td><td class="l">' + esc(m[1]) + '</td><td><span class="sh-chip ' + (m[4] || 'old') + '">' + esc(m[2]) + '</span></td><td>' + esc(m[3]) + '</td></tr>').join('') + '</table>' + (CONF.menuNote ? '<p class="nt" style="font-size:12px;color:#555">' + esc(CONF.menuNote) + '</p>' : '') : '') +
+      (J.length ? '<h2>업무 흐름 — 값이 넘어가는 사슬</h2><p>한 화면에서 만든 값이 다음 화면의 판단 근거가 됩니다. 상자를 누르면 그 화면 페이지로 갑니다.</p>' + J.map((j, k) => '<div class="bx" style="margin-top:' + (k ? 10 : 8) + 'px"><h3>' + esc(j.t) + '</h3>' + ch(j.nodes) + '</div>').join('') : '') +
+      '<h2>메뉴별 화면</h2>' + FLOWS.map((f) => '<div class="lane"><b>' + f.no + ' ' + esc(f.title) + '<small>' + esc(f.desc) + '</small></b><div class="nds">' + f.screens.map((id) => '<button data-scr="' + id + '"><span>' + id + '</span>' + esc(byId[id].title) + '</button>').join('') + '</div></div>').join('') +
+      '<h2>화면 전이 전체 <span style="font-weight:500;color:#777;font-size:13px">(' + TRANS.length + '건 · 시안의 버튼 연결에서 자동 생성)</span></h2><div class="wrapx"><table class="mxt"><tr><th>출발 화면</th><th>누르는 곳</th><th>도착 화면</th></tr>' + TRANS.map((x) => '<tr><td class="l">' + goChip(x.f) + '</td><td class="l">' + esc(x.l || '-') + '</td><td class="l">' + goChip(x.t) + '</td></tr>').join('') + '</table></div>';
+  }
+  function sbDict() {
+    const D = CONF.dict || { rows: [], msgs: [] };
+    return '<h2>상태값 사전</h2><p>한 화면에서 정한 상태값이 다른 화면에 같은 이름으로 나옵니다. 이름을 바꿀 때는 이 표의 모든 화면을 함께 바꿉니다.</p><div class="wrapx"><table class="mxt"><tr><th>분류</th><th>값</th><th>뜻</th><th>정하는 곳</th><th>보이는 곳</th></tr>' + (D.rows || []).map((r) => '<tr><td><b>' + esc(r[0]) + '</b></td><td class="l">' + esc(r[1]) + '</td><td class="l">' + esc(r[2]) + '</td><td>' + esc(r[3]) + '</td><td>' + esc(r[4]) + '</td></tr>').join('') + '</table></div>' +
+      '<h2>공통 문구</h2><p>여러 화면에 나오는 문구는 여기 적힌 그대로 씁니다.</p><div class="wrapx"><table class="mxt"><tr><th>상황</th><th>문구</th><th>근거</th></tr>' + (D.msgs || []).map((r) => '<tr><td><b>' + esc(r[0]) + '</b></td><td class="l"><q style="quotes:none;color:#0B5CAD">“' + esc(r[1]) + '”</q></td><td>' + esc(r[2]) + '</td></tr>').join('') + '</table></div>';
+  }
+  // 지도 기호 견본: 프로젝트 견본이 없으면 카카오 객체 종류와 첫 색으로 그린다
+  function swatch(r) {
+    const own = (CONF.swatches || {})[r.obj], col = ((r.style || '').match(/#[0-9A-Fa-f]{6}/) || ['#3D6FD6'])[0];
+    const gen = /Polygon/.test(r.kakao) ? '<path d="M6 30C10 12 30 6 44 12 56 18 58 34 46 40 30 46 10 42 6 30z" fill="' + col + '" fill-opacity=".18" stroke="' + col + '" stroke-width="2" stroke-dasharray="6 4"/>' : /Polyline/.test(r.kakao) ? '<path d="M6 40C18 14 40 40 58 12" fill="none" stroke="' + col + '" stroke-width="5" stroke-linecap="round"/>' : /Marker/.test(r.kakao) ? '<g transform="translate(32 36)"><path d="M0 0C-3-6-11-11-11-19a11 11 0 0 1 22 0c0 8-8 13-11 19z" fill="' + col + '" stroke="#FFF" stroke-width="1.5"/><circle cy="-19" r="4" fill="#FFF"/></g>' : '<circle cx="32" cy="26" r="8" fill="#FFFFFF" stroke="' + col + '" stroke-width="2"/>';
+    return '<svg width="64" height="48" viewBox="0 0 64 48" aria-hidden="true" style="display:block;background:#EEF1EC;border-radius:4px">' + (own || gen) + '</svg>';
+  }
+  const scrAlias = (id) => (CONF.screenAlias || {})[id] || id;
+
+  function sbMap() {
+    const M = DOC.map, tb = (cols, rows) => '<div class="wrapx"><table class="mxt"><tr>' + cols.map((c) => '<th>' + esc(c) + '</th>').join('') + '</tr>' + rows.join('') + '</table></div>';
+    return '<p>' + (CONF.mapIntro || '신규 화면의 지도 기호와 화면별 지도 구성입니다. 근거: 상세명세 13장.') + '</p>' +
+      '<h2>1. 지도 기본 설정</h2>' + tb(['항목', '값', '비고'], M.base.map((r) => '<tr><td><b>' + esc(r.k) + '</b></td><td class="l">' + rt(r.v) + '</td><td class="l">' + rt(r.n) + '</td></tr>')) +
+      '<h2>2. 지도 기호</h2>' + (CONF.mapNote ? '<p>' + CONF.mapNote + '</p>' : '') +
+      tb(['견본', '객체', '카카오 객체', '모양', '색 · 선', '쌓임', '라벨 · 상호작용'], M.sym.map((r) => '<tr><td>' + swatch(r) + '</td><td><b>' + esc(r.obj) + '</b></td><td style="font-family:var(--mono);font-size:11.5px">' + esc(r.kakao) + '</td><td class="l">' + esc(r.shape) + '</td><td class="l">' + esc(r.style) + '</td><td>' + esc(r.z) + '</td><td class="l">' + rt(r.act) + '</td></tr>')) +
+      '<h2>3. 화면별 지도 구성</h2>' + tb(['화면', '기본 표시', '토글', '초기 범위', '클릭 동작', '범례', '비었을 때 · 실패'], M.scr.map((r) => { const id = (r.scr.match(/^([A-Z]\d+)/) || [])[1]; const i = sbOf(scrAlias(id)); return '<tr><td class="l">' + (i >= 0 ? '<span class="tk go" data-sb="' + i + '" role="link" tabindex="0">' + esc(r.scr) + '</span>' : esc(r.scr)) + '</td><td class="l">' + esc(r.show) + '</td><td class="l">' + esc(r.toggle) + '</td><td class="l">' + esc(r.fit) + '</td><td class="l">' + esc(r.click) + '</td><td class="l">' + esc(r.legend) + '</td><td class="l">' + rt(r.empty) + '</td></tr>'; })) +
+      '<h2>4. 그리기 규칙</h2><ul>' + M.rules.map((x) => '<li>' + rt(x) + '</li>').join('') + '</ul>' +
+      '<h2>5. 구현 순서 (개발 참고)</h2><ol><li>지도 상자를 100% 채우는 컨테이너에 <code>new kakao.maps.Map(el, { center, level })</code> 생성, 확대 컨트롤 추가</li><li>fixture GeoJSON을 읽어 <code>[lng, lat]</code> → <code>LatLng(lat, lng)</code>로 한 번 변환</li><li>쌓임 순서대로 Polygon → Polyline → Marker · CustomOverlay 생성, 각 객체에 <code>zIndex</code> 지정</li><li>표시 객체 전체로 <code>LatLngBounds</code>를 만들어 <code>setBounds(bounds, 40, 40, 40, 40)</code></li><li>클릭 이벤트는 <code>kakao.maps.event.addListener</code>로 붙이고 목록 · 표 선택 상태와 같은 상태 값을 바꿈</li><li>탭 전환 · 패널 열림 · 창 크기 변경 시 <code>map.relayout()</code> 후 중심 유지</li><li>조건이 바뀌면 이전 객체를 <code>setMap(null)</code>로 지우고 다시 그림</li></ol>';
+  }
+
+
+  // 최종 검증: 문서 데이터와 시안에서 바로 계산한다
+  function sbVerify() {
+    const ids = (txt) => expandIds(txt), onScr = (f) => SCREENS.filter((s) => s.feat.indexOf(f) >= 0).map((s) => s.id);
+    const ok = (b, t) => '<span class="sh-chip ' + (b ? 'old' : 'new') + '">' + (t || (b ? '충족' : '확인 필요')) + '</span>';
+    const rtm = DOC.rtm.map((r) => { const fs = ids(r.ids), sc = [...new Set([].concat(...fs.map(onScr)))]; const pass = r.ids.indexOf('전체') >= 0 || (fs.length > 0 && fs.every((f) => FEAT[f])); return { r: r, fs: fs, sc: sc, pass: pass }; });
+    const CROSS = CONF.crossFeatures || {}; const noScreen = DOC.features.filter((f) => !onScr(f.id).length && !CROSS[f.id]);
+    const scrText = {}; SCREENS.forEach((s) => { const d = document.createElement('div'); d.innerHTML = H[s.id](); d.querySelectorAll('.dimmed').forEach((x) => x.remove()); scrText[s.id] = d.textContent.replace(/\s+/g, ''); });
+    const norm = (x) => x.replace(/\([^)]*\)/g, '').replace(/[\s·]/g, '');
+    const fieldRes = DOC.fields.map((f) => { const lb = norm(f.label.split('·')[0]); const t = scrText[f.scr] || ''; const AL = CONF.fieldAliases || {}; const hit = t.indexOf(AL[lb] || lb) >= 0 || (CONF.fieldPass ? !!CONF.fieldPass(f) : false); return { f: f, hit: hit }; });
+    const exInAt = DOC.ex.filter((x) => { const n = +x.id.slice(3); return DOC.at.some((a) => a.ex.split(',').some((q) => { q = q.trim(); if (q.indexOf('~') > 0) { const z = q.split('~'); return n >= +z[0] && n <= +z[1]; } return +q === n; })); }).length;
+    const mapScr = DOC.map.scr.map((r) => { const id = (r.scr.match(/^([A-Z]\d+)/) || [])[1]; const sid = scrAlias(id); const html = byId[sid] ? H[sid]() : ''; return { r: r, sid: sid, has: /class="map"/.test(html) }; });
+    const FB = CONF.forbidden === undefined ? null : CONF.forbidden, EXM2 = CONF.forbiddenExempt || {}; const demoLeft = FB ? SCREENS.filter((s) => !EXM2[s.id] && FB.test(scrText[s.id] || '')).map((s) => s.id) : [];
+    const fieldMiss = fieldRes.filter((x) => !x.hit);
+    const tb = (cols, rows) => '<div class="wrapx"><table class="mxt"><tr>' + cols.map((c) => '<th>' + esc(c) + '</th>').join('') + '</tr>' + rows.join('') + '</table></div>';
+    const chk = [
+      ['원본 요구 ' + DOC.rtm.length + '항목이 기능 ID로 연결됨', rtm.every((x) => x.pass), rtm.filter((x) => x.pass).length + ' / ' + rtm.length],
+      ['기능 ' + DOC.features.length + '개가 화면에 배치됨', noScreen.length === 0, (DOC.features.length - noScreen.length) + ' / ' + DOC.features.length + (Object.keys(CROSS).length ? ' · ' + Object.values(CROSS).join(' · ') : '') + (noScreen.length ? ' · 화면 없음: ' + noScreen.map((f) => f.id).join(', ') : '')],
+      DOC.fields.length && ['12.2 입력 필드가 화면에 있음', fieldMiss.length === 0, (fieldRes.length - fieldMiss.length) + ' / ' + fieldRes.length + (fieldMiss.length ? ' · 없음: ' + fieldMiss.map((x) => x.f.scr + ' ' + x.f.label).join(', ') : '')],
+      ['예외 ' + DOC.ex.length + '개가 검수 시나리오에 연결됨', exInAt === DOC.ex.length, exInAt + ' / ' + DOC.ex.length],
+      mapScr.length && ['13.3 화면별 지도가 시안에 있음', mapScr.every((x) => x.has), mapScr.filter((x) => x.has).length + ' / ' + mapScr.length],
+      FB && ['화면에 금지 표기 없음', demoLeft.length === 0, demoLeft.length ? '남음: ' + demoLeft.join(', ') : (Object.values(EXM2).join(' · ') || '없음')],
+      ['WBS 기준 공수', true, DOC.wbsBase.toFixed(1) + '인일 (여유 포함 ' + (DOC.wbsBase * 1.2).toFixed(1) + '~' + (DOC.wbsBase * 1.3).toFixed(1) + ')']
+    ];
+    const rules = CONF.instructions ? CONF.instructions() : [];
+    return '<h2>1. 원본 요구사항 → 기능 → 화면</h2>' + tb(['원본', '요구 항목', '기능 ID', '화면 · 화면설계서', '판정'], rtm.map((x) => '<tr><td><b>' + esc(x.r.src) + '</b></td><td class="l">' + esc(x.r.req) + '</td><td class="l" style="font-family:var(--mono);font-size:11.5px">' + esc(x.r.ids) + '</td><td class="l">' + (x.sc.length ? x.sc.map((s) => goChip(s)).join(' ') : '<span style="color:#888">전 화면 공통</span>') + '</td><td>' + ok(x.pass, x.r.how.indexOf('C') >= 0 ? '충족 · 조건부 포함' : '') + '</td></tr>')) +
+      '<h2>2. 자동 검사</h2>' + tb(['검사', '결과', '판정'], chk.filter(Boolean).map((c) => '<tr><td class="l"><b>' + esc(c[0]) + '</b></td><td class="l">' + esc(c[2]) + '</td><td>' + ok(c[1]) + '</td></tr>')) +
+      (noScreen.length ? '<p class="nt" style="font-size:12px;color:#555">화면이 없는 기능은 화면 전체에 걸친 공통 기능입니다: ' + noScreen.map((f) => f.id + ' ' + esc(f.name)).join(', ') + '. 기능정의서와 검수 시나리오에서 확인합니다.</p>' : '') +
+      (rules.length ? '<h2>3. 작업 지시 반영</h2>' + tb(['지시', '반영 위치 · 근거'], rules.map((r) => '<tr><td class="l"><b>' + esc(r[0]) + '</b></td><td class="l">' + rt(r[1]) + '</td></tr>')) : '') +
+      ((CONF.openItems || []).length ? '<h2>4. 남은 확인 사항</h2><ul>' + CONF.openItems.map((x) => '<li>' + rt(x) + '</li>').join('') + '</ul>' : '');
+  }
+
+  const SBX = {}; SBP.forEach((p, i) => { p.i = i; if (p.kind === 'scr' && !(p.scr in SBX) && !p.common) SBX[p.scr] = i; });
+  const sbOf = (key) => { if (/^SB-\d\d$/.test(key)) return SBP.findIndex((p) => p.no === key); return key in SBX ? SBX[key] : -1; };
+  const sbLabel = (i) => SBP[i].no + ' ' + (SBP[i].scr && SBP[i].kind === 'scr' ? SBP[i].scr + ' ' : '') + SBP[i].title;
+  const rt = (s) => esc(s)
+    .replace(/&quot;(.+?)&quot;/g, '<q>$1</q>')
+    .replace(/\{저장\}/g, '<span class="tk save">저장</span>').replace(/\{서버\}/g, '<span class="tk srv">서버</span>')
+    .replace(/\{기존\}/g, '<span class="tk old">기존 유지</span>').replace(/\{조건부\}/g, '<span class="tk cond">조건부</span>')
+    .replace(/\{(EX-\d\d)\}/g, (m, id) => '<span class="tk ex" title="' + esc(EXM[id] ? EXM[id].sit + ' → ' + EXM[id].how : '') + '">' + id + '</span>')
+    .replace(/\{→#([\w-]+)\}/g, (m, k) => { const i = SBP.findIndex((p) => p.id === k || (p.kind === 'scr' && p.scr === k)); return i < 0 ? k : '<span class="tk go" data-sb="' + i + '" role="link" tabindex="0">→ ' + esc(sbLabel(i)) + '</span>'; })
+    .replace(/\{→([A-Z]\d|SB-\d\d)\}/g, (m, k) => { const i = sbOf(k); return i < 0 ? k : '<span class="tk go" data-sb="' + i + '" role="link" tabindex="0">→ ' + esc(sbLabel(i)) + '</span>'; });
+  const bullets = (b) => { let h = '', open = false; b.forEach((x) => { if (/^\[.+\]$/.test(x)) { if (open) { h += '</ul>'; open = false; } h += '<div class="lb">' + esc(x) + '</div>'; return; } if (!open) { h += '<ul>'; open = true; } h += x.indexOf('- ') === 0 ? '<li class="l2">' + rt(x.slice(2)) + '</li>' : '<li>' + rt(x) + '</li>'; }); return h + (open ? '</ul>' : ''); };
+
+  // 화면 사이 이동: 시안의 data-go(눌러서 가는 곳)를 그대로 읽는다
+  const TRANS = [];
+  SCREENS.forEach((s) => { const d = document.createElement('div'); d.innerHTML = H[s.id](); d.querySelectorAll('[data-go]').forEach((e) => { if (e.closest('.dimmed')) return; const t = e.dataset.go; if (t === s.id) return; const lb = (e.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 34) || (e.classList.contains('x') ? '닫기' : ''); if (!TRANS.some((x) => x.f === s.id && x.t === t && x.l === lb)) TRANS.push({ f: s.id, t: t, l: lb }); }); });
+  const goChip = (id, lb) => { const i = sbOf(id); return '<span class="tk go" data-sb="' + i + '" role="link" tabindex="0">' + id + ' ' + esc(byId[id].title) + '</span>' + (lb ? '<span style="color:#666">' + esc(lb) + '</span>' : ''); };
+
+  function locate(root, m) {
+    let q = m.q, e = null;
+    if (q[0] === '$') e = root.querySelector(q.slice(1));
+    else {
+      const card = q[0] === '^'; if (card) q = q.slice(1);
+      let bl = 1e9;
+      root.querySelectorAll('*').forEach((x) => { if (x.closest('.dimmed') || x.closest('svg')) return; const t = x.textContent; if (t.indexOf(q) >= 0 && t.length < bl) { e = x; bl = t.length; } });
+      if (e && card) e = e.closest('.c, .modal') || e;
+    }
+    if (!e) return null;
+    for (let k = 0; k < (m.up || 0) && e.parentElement; k++) e = e.parentElement;
+    if (m.cl) e = e.closest(m.cl) || e;
+    return e;
+  }
+  function rectOf(e, sib) {
+    const rs = [e.getBoundingClientRect()]; let n = e;
+    for (let k = 0; k < (sib || 0); k++) { n = n.nextElementSibling; if (!n) break; rs.push(n.getBoundingClientRect()); }
+    return { l: Math.min.apply(null, rs.map((r) => r.left)), t: Math.min.apply(null, rs.map((r) => r.top)), r: Math.max.apply(null, rs.map((r) => r.right)), b: Math.max.apply(null, rs.map((r) => r.bottom)) };
+  }
+  function drawShot(p, host) {
+    const k = host.clientWidth / 1440; host.style.height = Math.round(900 * k) + 'px';
+    host.innerHTML = '<div class="sb-scale" style="transform:scale(' + k + ')">' + H[p.scr]() + '<div class="sb-ov"></div></div>';
+    const root = host.querySelector('.scr'), ov = host.querySelector('.sb-ov'), base = root.getBoundingClientRect();
+    const d = Math.max(30, 26 / k), lw = Math.max(2, 2 / k), bw = Math.max(3, 2.4 / k);
+    // 글자 영역(화면 좌표 → 1440×900 좌표): 번호 원이 다른 글자를 덮지 않게 자리를 고른다
+    const texts = [], tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), rg = document.createRange();
+    for (let nd = tw.nextNode(); nd; nd = tw.nextNode()) { if (!nd.textContent.trim()) continue; rg.selectNodeContents(nd); [...rg.getClientRects()].forEach((q) => { if (q.width > 0) texts.push({ n: nd, l: (q.left - base.left) / k, t: (q.top - base.top) / k, r: (q.right - base.left) / k, b: (q.bottom - base.top) / k }); }); }
+    const placed = []; let h = '', lines = '';
+    p.marks.forEach((m) => {
+      const e = locate(root, m); if (!e) { console.warn('[SB] 마커 위치를 찾지 못함', p.no, m.n, m.q); return; }
+      const r = rectOf(e, m.sib), x = (r.l - base.left) / k - 4, y = (r.t - base.top) / k - 4, w = (r.r - r.l) / k + 8, hh = (r.b - r.t) / k + 8;
+      const C = { tl: [x - d * .15, y - d * .15], tr: [x + w + d * .15, y - d * .15], bl: [x - d * .15, y + hh + d * .15], br: [x + w + d * .15, y + hh + d * .15], l: [x - d * .65, y + Math.min(hh / 2, d)], r: [x + w + d * .65, y + Math.min(hh / 2, d)], t: [x + Math.min(w / 2, d * 1.5), y - d * .65], b: [x + Math.min(w / 2, d * 1.5), y + hh + d * .65], tlo: [x - d * .75, y - d * .75], tro: [x + w + d * .75, y - d * .75] };
+      const order = [m.at || 'tl'].concat(['tl', 'tr', 'bl', 'br', 'l', 'r', 't', 'b', 'tlo', 'tro'].filter((o) => o !== (m.at || 'tl')));
+      let best = null;
+      order.forEach((o, oi) => {
+        const cx = Math.min(1440 - d / 2 - 2, Math.max(d / 2 + 2, C[o][0])), cy = Math.min(900 - d / 2 - 2, Math.max(d / 2 + 2, C[o][1])), rr = d / 2 + 2;
+        let sc = oi * .01;
+        texts.forEach((q) => { if (cx + rr > q.l && cx - rr < q.r && cy + rr > q.t && cy - rr < q.b) sc += e.contains(q.n) ? .5 : 2; });
+        placed.forEach((c) => { if (Math.hypot(c[0] - cx, c[1] - cy) < d * 1.05) sc += 5; });
+        if (!best || sc < best.sc) best = { sc: sc, cx: cx, cy: cy, o: o };
+      });
+      const cx = best.cx, cy = best.cy; placed.push([cx, cy]);
+      if (best.o.length > 2 || 'lrtb'.indexOf(best.o) >= 0) { const tx = Math.min(x + w, Math.max(x, cx)), ty = Math.min(y + hh, Math.max(y, cy)); lines += '<line x1="' + cx + '" y1="' + cy + '" x2="' + tx + '" y2="' + ty + '" stroke="#E5252A" stroke-width="' + bw + '"/>'; }
+      h += '<div class="sbm" data-n="' + m.n + '"><div class="sbm-box" style="left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + hh + 'px;border-width:' + bw + 'px"></div>' +
+        '<div class="sbm-n" role="button" tabindex="0" aria-label="' + m.n + '번 ' + esc(m.t) + '" style="left:' + (cx - d / 2) + 'px;top:' + (cy - d / 2) + 'px;width:' + d + 'px;height:' + d + 'px;font-size:' + (d * (m.n.length > 1 ? .44 : .52)) + 'px;box-shadow:0 0 0 ' + lw + 'px #FFFFFF">' + m.n + '</div></div>';
+    });
+    ov.innerHTML = '<svg width="1440" height="900" style="position:absolute;left:0;top:0;overflow:visible" aria-hidden="true">' + lines + '</svg>' + h;
+  }
+  const mxTable = (x) => '<div class="mx"><h3><b>' + x.n + '</b>' + esc(x.t) + '</h3><div class="wrapx"><table class="mxt"><tr>' + x.cols.map((c) => '<th>' + esc(c) + '</th>').join('') + '</tr>' +
+    x.rows.map((r) => '<tr>' + r.map((c, i) => '<td class="' + (c === 'O' ? 'o' : c === 'X' || c === '-' ? 'x' : (i === r.length - 1 || String(c).length > 14 ? 'l' : '')) + '">' + rt(c) + '</td>').join('') + '</tr>').join('') + '</table></div>' + (x.note ? '<p class="nt">' + rt(x.note) + '</p>' : '') + '</div>';
+
+  function sheetHead(p) {
+    const s = p.scr ? byId[p.scr] : null;
+    const tag = p.tag ? '<span class="sh-chip ' + p.tag + '">' + esc(p.tagT || (p.tag === 'new' ? '신규' : '기존 유지')) + '</span>' : '';
+    return '<div class="sh-top"><h1>관리자</h1><span class="path">' + esc(p.path) + '</span><span class="meta">' + tag + (s ? '<span class="sh-chip mono">SCR-' + s.id + '</span>' + s.feat.map((f) => '<span class="sh-chip mono" title="' + esc(FEAT[f] ? FEAT[f].name : '') + '">' + f + '</span>').join('') : '') + '<span class="sh-chip mono">' + p.no + '</span></span></div>';
+  }
+  function flowRows(p) {
+    if (!p.scr || !!p.common) return '';
+    const ins = TRANS.filter((x) => x.t === p.scr), outs = TRANS.filter((x) => x.f === p.scr);
+    const list = (a, key) => a.length ? a.map((x) => goChip(x[key], (key === 't' ? '“' + x.l + '” 누르면' : '“' + x.l + '”에서'))).join('<span class="ar">·</span>') : '<span style="color:#888">없음</span>';
+    return '<div>들어오는 곳</div><div>' + list(ins, 'f') + '</div><div>나가는 곳</div><div>' + list(outs, 't') + '</div>';
+  }
+  const ctxBox = (p) => { const f = flowRows(p); const c = (p.ctx || []).map((r) => '<div>' + esc(r[0]) + '</div><div>' + rt(r[1]) + '</div>').join(''); return f || c ? '<div class="ctx">' + f + c + '</div>' : ''; };
+
+  let sbCur = 0;
+  function renderSB() {
+    const p = SBP[sbCur];
+    $('sbIdx').querySelectorAll('button').forEach((b) => b.setAttribute('aria-current', String(+b.dataset.sb === sbCur)));
+    $('sbPos').textContent = (sbCur + 1) + ' / ' + SBP.length + ' · ' + sbLabel(sbCur);
+    $('sbPrev').disabled = sbCur === 0; $('sbNext').disabled = sbCur === SBP.length - 1;
+    $('sbMap').hidden = !p.scr;
+    const box = $('sbSheet');
+    let h = sheetHead(p) + (p.purpose || (p.scr && p.kind === 'scr' && !p.common) ? '<p class="sh-purpose">' + esc(p.purpose || byId[p.scr].purpose) + '</p>' : '');
+    if (p.kind === 'doc') h += '<div class="dp">' + p.render() + '</div>';
+    else if (p.kind === 'mx') h += p.mx.map(mxTable).join('') + ctxBox(p);
+    else {
+      h += '<div class="sh-body"><div><div class="sb-shot" id="sbShot"></div>' + (p.subs ? '<div class="subs">' + p.subs.map((s) => '<div class="sub" data-n="' + s.n.split('-')[0] + '"><span class="sn">' + s.n + '</span><div class="scap">' + esc(s.cap) + '</div>' + s.html + '</div>').join('') + '</div>' : '') + '</div>' +
+        '<div class="desc"><div class="dh">Description</div>' + p.marks.map((m) => '<div class="dr" data-n="' + m.n + '"><div class="dt"><b>' + m.n + '</b>' + esc(m.t) + '</div>' + bullets(/지도/.test(m.t) ? m.b.concat(['그리는 기준은 {→#map} (상세명세 13장)']) : m.b) + ((p.subs || []).filter((s) => s.n.split('-')[0] === m.n).map((s) => '<div class="lb">' + s.n + '. ' + esc(s.cap) + '</div>').join('')) + '</div>').join('') + '</div></div>' +
+        (p.mx ? '<div style="margin-top:18px">' + p.mx.map(mxTable).join('') + '</div>' : '') + ctxBox(p);
+    }
+    box.innerHTML = h;
+    $('sbMain').scrollTop = 0;
+    if (p.kind === 'scr') drawShot(p, $('sbShot'));
+    box.querySelectorAll('[data-sb]').forEach((b) => { const go = () => sbGo(+b.dataset.sb); b.onclick = go; b.onkeydown = (e) => { if (e.key === 'Enter') go(); }; });
+    box.querySelectorAll('[data-scr]').forEach((b) => b.onclick = () => sbGo(sbOf(b.dataset.scr)));
+    const hi = (n, on) => box.querySelectorAll('.sbm[data-n="' + n + '"], .dr[data-n="' + n + '"]').forEach((x) => x.classList.toggle('hi', on));
+    box.querySelectorAll('.dr, .sbm-n').forEach((x) => { const n = (x.dataset.n || x.parentElement.dataset.n); x.onmouseenter = () => hi(n, true); x.onmouseleave = () => hi(n, false); });
+    box.querySelectorAll('.sbm-n').forEach((x) => { const go = () => { const r = box.querySelector('.dr[data-n="' + x.parentElement.dataset.n + '"]'); if (r) { r.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); hi(x.parentElement.dataset.n, true); setTimeout(() => hi(x.parentElement.dataset.n, false), 1200); } }; x.onclick = go; x.onkeydown = (e) => { if (e.key === 'Enter') go(); }; });
+    try { localStorage.setItem('fm.sb', JSON.stringify({ mode: app.classList.contains('mode-sb') ? 'sb' : 'map', page: sbCur })); } catch (e) { /* 저장 불가 무시 */ }
+  }
+  function sbGo(i) { if (i < 0 || i >= SBP.length) return; sbCur = i; renderSB(); }
+  function setMode(m) {
+    app.classList.toggle('mode-sb', m === 'sb');
+    document.querySelectorAll('#modeSw button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.mode === m)));
+    if (m === 'sb') renderSB(); else { try { localStorage.setItem('fm.sb', JSON.stringify({ mode: 'map', page: sbCur })); } catch (e) { /* 무시 */ } requestAnimationFrame(() => { layout(); drawMini(); }); }
+  }
+
+  // ----- 문서 페이지 -----
+  // ----- 틀 연결 -----
+  (function mountSB() {
+    const brand = document.querySelector('.top .brand');
+    const sw = el('div', 'mode'); sw.id = 'modeSw'; sw.setAttribute('role', 'tablist'); sw.setAttribute('aria-label', '보기');
+    sw.innerHTML = '<button role="tab" data-mode="map" aria-selected="true">플로우 맵</button><button role="tab" data-mode="sb" aria-selected="false">화면설계서</button>';
+    brand.after(sw);
+    sw.querySelectorAll('button').forEach((b) => b.onclick = () => setMode(b.dataset.mode));
+    document.querySelectorAll('.top .layers, .top .sep, #zoomOut, #zoomVal, #zoomIn, #fitAll, #play, #btnLeft, #btnRight').forEach((x) => x.classList.add('map-only'));
+    const v = el('section', 'sbv'); v.setAttribute('aria-label', '화면설계서');
+    const groups = sbGroups();
+    v.innerHTML = '<nav class="sbx" id="sbIdx" aria-label="화면설계서 목차">' + groups.map((g) => '<h4>' + esc(g[0]) + '</h4>' + SBP.filter(g[1]).map((p) => '<button data-sb="' + p.i + '"><span>' + p.no + '</span><span>' + (p.kind === 'mx' ? '└ ' : '') + esc(p.title) + '</span>' + (p.scr && p.kind === 'scr' ? '<small>SCR-' + p.scr + '</small>' : '') + '</button>').join('')).join('') + '</nav>' +
+      '<div class="sbmain" id="sbMain"><div class="sbnav"><button class="tb" id="sbPrev" aria-label="이전 페이지">‹ 이전</button><button class="tb" id="sbNext" aria-label="다음 페이지">다음 ›</button><span class="t" id="sbPos"></span><button class="tb" id="sbMap">플로우 맵에서 보기</button></div><article class="sheet" id="sbSheet"></article></div>';
+    app.appendChild(v);
+    $('sbIdx').querySelectorAll('button').forEach((b) => b.onclick = () => sbGo(+b.dataset.sb));
+    $('sbPrev').onclick = () => sbGo(sbCur - 1); $('sbNext').onclick = () => sbGo(sbCur + 1);
+    $('sbMap').onclick = () => { const p = SBP[sbCur]; setMode('map'); if (p.scr) { select(p.scr); setTimeout(() => focus(p.scr), 60); } };
+    window.addEventListener('keydown', (e) => {
+      if (!app.classList.contains('mode-sb') || !$('docs').hidden) return;
+      if (e.target.closest && e.target.closest('input,textarea,select')) return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { sbGo(sbCur + 1); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { sbGo(sbCur - 1); e.preventDefault(); }
+      else if (e.key === 'm' || e.key === 'M') setMode('map');
+      if (e.key !== 'd' && e.key !== 'D') e.stopPropagation();
+    }, true);
+    let rz = 0; window.addEventListener('resize', () => { if (!app.classList.contains('mode-sb')) return; clearTimeout(rz); rz = setTimeout(() => { const p = SBP[sbCur]; if (p.kind === 'scr') drawShot(p, $('sbShot')); }, 150); });
+    window.openSB = (id) => { sbCur = Math.max(0, sbOf(id)); setMode('sb'); };
+    try { const s = JSON.parse(localStorage.getItem('fm.sb') || 'null'); if (s && s.mode === 'sb') { sbCur = Math.min(SBP.length - 1, s.page || 0); setTimeout(() => setMode('sb'), 0); } } catch (e) { /* 무시 */ }
+  })();
+  // 로컬 검수용: 마커 대상이 잘리거나 가려졌는지, 마커끼리 겹치는지, 화면 안에서 내용이 넘쳐 잘리는지
+  if (location.hostname === '127.0.0.1') window.__sbAudit = () => {
+    const out = [], prev = sbCur, seen = {};
+    const clipVis = (e, stop) => { const r = e.getBoundingClientRect(); let v = { l: r.left, t: r.top, r: r.right, b: r.bottom }; for (let a = e.parentElement; a && a !== stop; a = a.parentElement) { const cs = getComputedStyle(a); if (cs.overflowX !== 'visible' || cs.overflowY !== 'visible') { const q = a.getBoundingClientRect(); v = { l: Math.max(v.l, q.left), t: Math.max(v.t, q.top), r: Math.min(v.r, q.right), b: Math.min(v.b, q.bottom) }; } } const A = Math.max(1, (r.right - r.left) * (r.bottom - r.top)); return { r: r, v: v, ratio: Math.max(0, v.r - v.l) * Math.max(0, v.b - v.t) / A }; };
+    const txt = (e) => (e.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+    SBP.forEach((p, i) => {
+      if (p.kind !== 'scr') return; sbGo(i);
+      const host = $('sbShot'), root = host.querySelector('.scr');
+      p.marks.forEach((m) => {
+        const e = locate(root, m); if (!e) { out.push([p.no, m.n, m.t, '대상 없음']); return; }
+        const c = clipVis(e, host); if (c.ratio < .97) out.push([p.no, m.n, m.t, '대상이 잘림 ' + Math.round(c.ratio * 100) + '%']);
+        e.scrollIntoView({ block: 'center' });
+        const c2 = clipVis(e, host), pts = [[.5, .5], [.15, .5], [.85, .5]];
+        pts.forEach((f) => { const x = c2.v.l + (c2.v.r - c2.v.l) * f[0], y = c2.v.t + (c2.v.b - c2.v.t) * f[1]; const t = document.elementFromPoint(x, y); if (!t) return; if (t.closest('.sbm-n')) { if (t.closest('.sbm').dataset.n !== m.n) out.push([p.no, m.n, m.t, (t.closest('.sbm').dataset.n) + '번 원이 대상을 덮음']); } else if (!e.contains(t) && !t.contains(e)) out.push([p.no, m.n, m.t, '다른 요소가 덮음: ' + (t.className || t.tagName) + ' "' + txt(t) + '"']); });
+      });
+      const gl = []; { const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), rg = document.createRange(); for (let nd = tw.nextNode(); nd; nd = tw.nextNode()) { if (!nd.textContent.trim() || (nd.parentElement && nd.parentElement.closest('.dimmed'))) continue; rg.selectNodeContents(nd); [...rg.getClientRects()].forEach((q) => { if (q.width > 0) gl.push([nd, q]); }); } }
+      host.querySelectorAll('.sbm-n').forEach((c) => { const n = c.parentElement.dataset.n, m = p.marks.find((x) => x.n === n), tg = m && locate(root, m); const r = c.getBoundingClientRect(), pad = r.width * .12; const hit = {}; gl.forEach((g) => { const q = g[1]; if (r.right - pad > q.left && r.left + pad < q.right && r.bottom - pad > q.top && r.top + pad < q.bottom && !(tg && tg.contains(g[0]))) hit[g[0].textContent.trim().slice(0, 30)] = 1; }); Object.keys(hit).forEach((h) => out.push([p.no, n, m ? m.t : '', '원이 다른 글자를 가림: "' + h + '"'])); });
+      const ns = [...host.querySelectorAll('.sbm-n')].map((x) => [x.textContent, x.getBoundingClientRect()]);
+      for (let a = 0; a < ns.length; a++) for (let b = a + 1; b < ns.length; b++) { const A = ns[a][1], B = ns[b][1]; const d = Math.hypot((A.left + A.right - B.left - B.right) / 2, (A.top + A.bottom - B.top - B.bottom) / 2); if (d < A.width * .95) out.push([p.no, ns[a][0] + '·' + ns[b][0], '', '번호 원끼리 겹침']); }
+      if (!seen[p.scr]) { const kk = host.clientWidth / 1440, cs = [...root.querySelectorAll('.c, .modal, .note, .ph, .tabsx, .row, .g, .ct > *')].filter((x) => !x.closest('.dimmed'));
+        for (let a = 0; a < cs.length; a++) for (let b = a + 1; b < cs.length; b++) { const A = cs[a], B = cs[b]; if (A.contains(B) || B.contains(A) || A.closest('.modal') !== B.closest('.modal')) continue; const P = A.getBoundingClientRect(), Q = B.getBoundingClientRect(), ox = Math.min(P.right, Q.right) - Math.max(P.left, Q.left), oy = Math.min(P.bottom, Q.bottom) - Math.max(P.top, Q.top); if (ox > 2 && oy > 2) out.push([p.scr, '-', '"' + txt(A).slice(0, 14) + '" × "' + txt(B).slice(0, 14) + '"', '영역끼리 겹침 ' + Math.round(ox / kk) + '×' + Math.round(oy / kk)]); } }
+      if (!seen[p.scr]) { seen[p.scr] = 1; root.querySelectorAll('*').forEach((x) => { if (x.closest('.dimmed') || x.closest('svg')) return; const cs = getComputedStyle(x); if ((cs.overflowX !== 'visible' || cs.overflowY !== 'visible') && cs.textOverflow !== 'ellipsis' && (x.scrollWidth > x.clientWidth + 2 || x.scrollHeight > x.clientHeight + 2)) out.push([p.scr, '-', (x.className || x.tagName) + ' "' + txt(x) + '"', '화면 내용 넘침 ' + (x.scrollWidth - x.clientWidth) + '×' + (x.scrollHeight - x.clientHeight)]); }); }
+    });
+    sbGo(prev); return out.map((r) => r.join(' | ')).join('\n');
+  };
+
+  // ---------- 키보드 ----------
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest && e.target.closest('input,textarea,select')) return;
+    if (!$('proto').hidden) { if (e.key === 'Escape') closeProto(); if (e.key === 'ArrowLeft') $('pBack').click(); return; }
+    if (!$('docs').hidden) { if (e.key === 'Escape') $('docs').hidden = true; return; }
+    if (e.key === '1') fitAll(); else if (e.key === '2' && sel) focus(sel); else if (e.key === 'p' || e.key === 'P') openProto(sel || 'D1'); else if (e.key === 'd' || e.key === 'D') openDocs(); else if (e.key === 'Escape') select(null);
+  });
+  window.addEventListener('resize', () => { if (!$('proto').hidden) pScale(); drawMini(); });
+  const mq = window.matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', drawMini);
+
+  build(); renderLeft(); renderIns(); fitAll();
+  let relay = 0; const re = () => { clearTimeout(relay); relay = setTimeout(() => { layout(); drawMini(); }, 150); };
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(re);
+  window.addEventListener('load', re);
+})();
+</script>
