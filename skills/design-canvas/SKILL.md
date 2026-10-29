@@ -5,6 +5,8 @@ description: 프로젝트 화면 시안을 Claude Design 캔버스(Design 타입
 
 # Claude Design 캔버스
 
+〔6/7 디자인 · 선택〕 사용자가 Claude Design 보드를 원할 때만 한다. 다음 예고: "〔7/7 검수〕"
+
 ## 1. 내보내기로 시작
 
 ```bash
@@ -15,7 +17,7 @@ project.js의 H · SCREENS · FLOWS를 보드로 바꾼다: 화면마다 `<ID>.d
 ## 2. 다듬기 (편집 가능한 디자인으로)
 
 반복되는 부분은 공통 컴포넌트로 뺀다. 예시: `examples/demo-park/design-export/`(공통 사이드바를 쓰는 보드).
-- `.dc.html` 형식: `<script src="./support.js">` · `<x-dc>` 안에 마크업 · `<helmet>`(폰트 · 스타일) · `{{값}}` 구멍(점 경로만) · `<sc-for list="{{목록}}" as="x">` · `<sc-if value="{{조건}}">` · `<dc-import name="Map" 속성=…>` · 끝에 `<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":940}}'>class Component extends DCLogic { renderVals() { return {…}; } }</script>`.
+- `.dc.html` 형식: `<script src="./support.js">`(Claude Design이 게시할 때 넣는 런타임이라 저장소에는 없다. 로컬 점검은 harness.html로 한다) · `<x-dc>` 안에 마크업 · `<helmet>`(폰트 · 스타일) · `{{값}}` 구멍(점 경로만) · `<sc-for list="{{목록}}" as="x">` · `<sc-if value="{{조건}}">` · `<dc-import name="Map" 속성=…>` · 끝에 `<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":940}}'>class Component extends DCLogic { renderVals() { return {…}; } }</script>`.
 - 보드 사이 이동은 `<a href="P2.dc.html">`. 속성 이름은 kebab-case → props는 camelCase(`zone-on` → `zoneOn`).
 - **`dc-import`는 높이 없는 칸(`sc-host`)에 들어간다.** 상자를 채워야 하는 컴포넌트(지도 등)는 `style="display:block;width:100%;height:100%"`를 준다. 안 주면 컴포넌트가 최소 높이로 그려지고 아래가 빈다.
 - 보드 높이와 화면 틀 최소 높이를 맞춘다(보드 940이면 `.app`/`.side` min-height 940). 다르면 모든 보드 아래에 빈 띠가 생긴다.

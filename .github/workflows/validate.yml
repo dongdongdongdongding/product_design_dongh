@@ -19,6 +19,21 @@ jobs:
       - name: plugin manifest JSON
         run: |
           python -c "import json; json.load(open('.claude-plugin/plugin.json')); json.load(open('.claude-plugin/marketplace.json'))"
+      - name: skill / command frontmatter
+        run: |
+          pip install pyyaml -q
+          python - <<'EOF'
+          import glob, yaml
+          for f in glob.glob('skills/*/SKILL.md') + glob.glob('commands/*.md'):
+              d = yaml.safe_load(open(f, encoding='utf8').read().split('---')[1])
+              assert isinstance(d.get('description'), str), f
+              assert not isinstance(d.get('argument-hint', ''), list), f + ' argument-hint must be a quoted string'
+              if f.startswith('skills'):
+                  assert d.get('name'), f
+          print('frontmatter ok')
+          EOF
+      - name: install script (dry run)
+        run: python scripts/install_skills.py --to /tmp/skills && test -f /tmp/skills/screen-spec-kit/SKILL.md
       - name: docs consistency (demo)
         run: python scripts/check_docs.py --docs examples/demo-park/docs --screens D1,F1,F2,B1,B2
       - name: docs consistency (starter)

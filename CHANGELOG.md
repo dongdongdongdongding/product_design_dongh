@@ -2,6 +2,20 @@
 
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르고, 버전은 [SemVer](https://semver.org/lang/ko/)를 씁니다.
 
+## [1.2.0] - 2026-10-29
+
+### 추가
+- 안내 흐름: 진입 스킬을 0~7단계 지도로 재구성(시작 질문 · 확인 지점 · 다음 단계 예고 · 건너뛰기 · 자동 모드).
+- `design-brief` 스킬과 디자인 질문 목록(21개, 모두 기본값).
+- `draft-review` 스킬: 핵심 화면 초안 → 유지/수정/추가/질문 피드백 → 반복 → 전체 확장.
+- `templates/intake/`: 진행 기록(progress.md) · 자료 요청 목록 · 디자인 브리프 양식.
+- 명령 `start` · `status`.
+- Codex 지원: `AGENTS.md`, `scripts/install_skills.py`(`--codex` · `--claude` · `--to` · `--zip`).
+
+### 바뀜
+- `source-intake`: 기획서 · 요구사항 정의서 받기 안내, 원래 요구 ID 유지, 요구 목록 확인 지점.
+- 각 하위 스킬에 단계 번호와 다음 단계 예고.
+
 ## [1.1.0] - 2026-10-29
 
 ### 추가

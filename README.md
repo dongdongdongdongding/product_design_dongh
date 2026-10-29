@@ -9,7 +9,7 @@
 요청서 · 기획서 · 참고 화면설계서 · 배포 사이트를 읽고<br>
 개발 문서 → 화면 시안 → 플로우 맵 → 화면설계서(SB) → Claude Design 보드 → 자동 검수까지 한 번에 만듭니다.
 
-[![version](https://img.shields.io/badge/version-1.1.0-2E9E6B)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-1.2.0-2E9E6B)](CHANGELOG.md)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-D97757)](https://code.claude.com/docs/en/plugins)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![validate](https://github.com/donghk-cloud/screen-spec-kit/actions/workflows/validate.yml/badge.svg)](https://github.com/donghk-cloud/screen-spec-kit/actions/workflows/validate.yml)
@@ -40,6 +40,32 @@ screen-spec-kit은 **원본은 Markdown 문서 3종 + 화면 시안 한 파일**
 - 🤖 **자동 검수** — 로컬 서버 + Claude in Chrome으로 SB 마커 잘림 · 겹침, 연결선의 화면 관통, 디자인 보드 잘림 · 빈 공간을 숫자로 보고합니다. "0건"이 될 때까지 고칩니다.
 - 🎨 **Claude Design으로 내보내기** — 시안을 `.dc.html` 보드와 `canvas.json`으로 내보내고, 버튼 연결은 보드 간 링크가 됩니다.
 
+## 쓰는 흐름 — 안내를 따라가면 됩니다
+
+플러그인을 설치하고 `/screen-spec-kit:start`(또는 그냥 "시작")라고 하면, 단계마다 무엇을 받는지 · 무엇이 나오는지 알려 주며 진행합니다.
+
+| 단계 | 키트가 하는 일 | 내가 하는 일 |
+|---|---|---|
+| 0. 시작 | "무엇을 갖고 계세요?" 5문항으로 시작 지점을 정함 | 가진 자료 말하기 |
+| 1. 자료 받기 | 기획서 · **요구사항 정의서**를 읽고 요구 목록 표를 만듦 (원래 요구 ID 유지) | 빠진 · 잘못 읽은 요구 확인 |
+| 2. 디자인 질문 | 기준 사이트 · 톤 · 색 · 밀도 · 목록/폼 패턴을 최대 7문항으로 질문 (모두 기본값 있음) | 답하거나 "기본값" |
+| 3. 초안 | 핵심 화면 2~4개 + 플로우 맵 초안을 보여 줌 | 유지 / 수정 / 추가 / 질문으로 피드백 |
+| 4. 검토 · 개선 | 피드백 반영 → 다시 보여 줌 (회차 기록) | "좋아요" 하면 다음 |
+| 5. 전체 확장 | 모든 화면 · 문서 3종 · 연결을 채운 플로우 맵 | 범위 · 공수 결정 |
+| 6. SB · 디자인 | 화면설계서 탭, (선택) Claude Design 보드 | 참고 SB 형식 주기 |
+| 7. 검수 · 전달 | 자동 검수 0건 → 링크 · 파일 전달 | 게시 여부 |
+
+**자유롭게**: 아무 단계에서나 시작하고("문서는 있어요, 초안부터"), 건너뛰고("디자인 캔버스는 빼고"), 되돌아갈 수 있습니다("요구 하나 추가"). 질문이 싫으면 **"알아서 끝까지"** — 기본값으로 끝까지 만든 뒤 가정 목록을 한 번에 보여 줍니다. 진행 상황은 `spec-kit/progress.md`에 남아 다음 대화에서 이어집니다(`/screen-spec-kit:status`).
+
+```text
+나: 시작
+키트: 〔0/7 시작〕 기획서 · 요구사항 정의서로 화면 초안, 플로우 맵, 화면설계서까지 만들어 드립니다.
+      1) 기획서가 있나요?  2) 요구사항 정의서 · 요청서가 있나요?  3) 운영 중인 사이트 주소는?
+      4) 따라야 할 SB · 디자인 가이드는?  5) 용도는(실제 개발 / 제안 · 시연 / 내부 검토)?
+나: 기획서.pptx랑 요구사항정의서.xlsx 있고 사이트는 없어요. 실제 개발용.
+키트: 〔1/7 자료 받기〕 요구 24개를 뽑았습니다(메뉴별 표). 애매한 3개는 이렇게 해석했어요 … 빠진 것 있나요?
+```
+
 ## 화면
 
 | 화면 선택 → 인스펙터 | 연결선 클릭 → 연결 정보 |
@@ -67,6 +93,8 @@ artifact-qa (audits/*.js · harness.html) → 0건 → Artifact로 게시
 
 ## 설치
 
+### Claude Code
+
 ```bash
 # Claude Code 안에서
 /plugin marketplace add donghk-cloud/screen-spec-kit
@@ -74,6 +102,18 @@ artifact-qa (audits/*.js · harness.html) → 0건 → Artifact로 게시
 ```
 
 필요: Python 3.10+, Node 18+. 자동 검수에는 [Claude in Chrome](https://claude.com/chrome), 게시에는 Artifact 도구가 필요합니다.
+
+### Codex
+
+```bash
+git clone https://github.com/donghk-cloud/screen-spec-kit
+python screen-spec-kit/scripts/install_skills.py --codex     # → ~/.agents/skills/
+```
+Codex를 다시 시작한 뒤 `$screen-spec-kit` 또는 "기획서로 화면설계서 만들어줘"라고 합니다. 저장소 안에서 Codex를 열면 [`AGENTS.md`](AGENTS.md)가 같은 흐름을 안내합니다. 브라우저 검수 · Artifact 게시 대신 로컬 서버 주소와 파일로 결과를 보여 줍니다.
+
+### claude.ai
+
+`python scripts/install_skills.py --zip dist/`로 스킬별 zip을 만들어 설정 › 기능 › 스킬에 올립니다. 빌드 스크립트가 필요한 단계는 저장소 파일을 대화에 함께 첨부해 주세요.
 
 ## 빠른 시작
 
@@ -104,17 +144,21 @@ python -m http.server 8768 --bind 127.0.0.1                     # http://127.0.0
 
 | 경로 | 내용 |
 |---|---|
-| `skills/screen-spec-kit` | 진입점: 전체 순서 · 원칙 · 자주 틀린 것 |
-| `skills/source-intake` | 원본 파일(HWP · PPTX · PDF …) 읽기, 배포 사이트 메뉴 · 디자인 값 측정 |
+| `skills/screen-spec-kit` | 진입점: 단계 지도 · 시작 질문 · 진행 규칙(건너뛰기 · 자동 모드) · 도구 대체 |
+| `skills/source-intake` | 1단계: 자료 받기 안내, 기획서 · 요구사항 정의서 읽기, 운영 사이트 측정 |
+| `skills/design-brief` | 2단계: 디자인 질문 21개 중 골라 묻기 → 디자인 브리프 · theme.css |
+| `skills/draft-review` | 3 · 4단계: 핵심 화면 초안 → 피드백 반영 반복 → 전체 확장 |
 | `skills/spec-docs` | 문서 3종 작성 · 대조, 빌드가 읽는 표 목록 |
 | `skills/flowmap-artifact` | `project.js` 계약 · 시안 규칙 · 연결선 · 게시 |
 | `skills/sb-screen-spec` | SB 문법(마커 · 토큰 · 하위 상태 · 판정표 · SBCONF) |
 | `skills/design-canvas` | Claude Design 보드 내보내기 · 컴포넌트화 · 병합 |
 | `skills/artifact-qa` | 로컬 서버 + Chrome 자동 검수, 결과 해석, 보고 형식 |
-| `commands/` | `new` · `build` · `audit` · `publish` |
+| `commands/` | `start` · `status` · `new` · `build` · `audit` · `publish` |
 | `engine/` | 공통 엔진(template.html · sb-head.js · sb-tail.js · sb.css). 프로젝트마다 고치지 않습니다 |
 | `scripts/` | `build_kit.py` · `build_flowmap.py`(문서 파서) · `check_docs.py` · `export_design.mjs` · `audits/` |
 | `templates/project-starter/` | 새 프로젝트 틀(화면 3 · 문서 3종 뼈대) |
+| `templates/intake/` | 진행 기록 · 자료 요청 목록 · 디자인 브리프 양식 |
+| `AGENTS.md` · `scripts/install_skills.py` | Codex 등 다른 에이전트용 안내와 스킬 설치 |
 | `examples/demo-park/` | 끝까지 만든 가상 예시(화면 5 · SB 12쪽 · 기능 8 · 예외 7 · 검수 4) |
 
 ## 엔진 계약 (요약)
@@ -138,6 +182,7 @@ python -m http.server 8768 --bind 127.0.0.1                     # http://127.0.0
 
 | 버전 | 내용 |
 |---|---|
+| 1.2.0 | 안내 흐름: 시작 질문 · 디자인 질문 · 초안 검토 반복 · 진행 기록 · 자동 모드, Codex · claude.ai 지원 |
 | 1.1.0 | 공개 버전. 문서 패널 문구를 `PROJECT.docs`로 분리, 기능 ID 접두어 제한 제거, 가상 예시 `demo-park` |
 | 1.0.0 | 내부 버전. 엔진 · 프로젝트 분리, 스킬 7 · 명령 4 |
 

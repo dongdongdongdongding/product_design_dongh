@@ -1,6 +1,6 @@
 {
   "name": "screen-spec-kit",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "원본 자료(요청서 · 기획서 · 참고 화면설계서 · 배포 사이트)에서 개발 문서 3종, 플로우 맵, 화면설계서(SB), Claude Design 캔버스, 자동 검수까지 만드는 화면 설계 키트",
   "author": { "name": "donghk-cloud", "url": "https://github.com/donghk-cloud" },
   "homepage": "https://github.com/donghk-cloud/screen-spec-kit",
