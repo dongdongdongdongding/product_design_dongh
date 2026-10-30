@@ -2,9 +2,9 @@
 
 <img src="docs/media/icon.png" alt="" width="96" height="96">
 
-# screen-spec-kit
+# product_design_dongh
 
-<sub>플러그인 이름 <code>product_design_dongh</code> · 명령 <code>/product_design_dongh:start</code></sub>
+**한국어** · [English](README.en.md) · [中文](README.zh-CN.md) · [日本語](README.ja.md)
 
 **기획서 한 벌, 아이디어 한 줄이 화면설계서 · 플로우 맵 · 편집 가능한 디자인 캔버스 · 검수표가 되는 Claude Code 플러그인**
 
@@ -43,6 +43,7 @@ screen-spec-kit은 **원본은 Markdown 문서 3종 + 화면 시안 한 파일**
 - 🧩 **아이디어도 끝까지 분해** — 한두 문장만 줘도 역할 → 메뉴 → 화면 → 기능 → 컴포넌트 · 동작 → 화면 연결 → 데이터 · 상태 · 권한 → 예외 → 기본 결정까지 키트가 해석합니다. "어떤 메뉴가 필요하세요?"라고 묻지 않습니다.
 - 🎨 **디자인은 글이 아니라 시안으로** — 외부 레퍼런스를 찾아 핵심 화면 하나를 방향이 다른 시안 2~4개로 그려 Claude Design 캔버스에 나란히 올립니다. 고르거나 섞거나, 캔버스에서 직접 고치면 그 수정을 가져와 시안 · 문서 · SB에 반영합니다(`import_design.mjs`).
 - 📐 **디자인 시스템 내장** — Apple HIG 원칙, 닐슨 휴리스틱 자체 점검, W3C 디자인 토큰(`design_tokens.py`: 색 정리 · CSS 변수 연결 · 대비 검사), 컴포넌트 × 상태 보드.
+- 🌐 **한국어 · English · 中文 · 日本語** — 대화와 산출물은 사용자 언어로 만들고, `kit.json`의 `"lang"`(ko · en · zh · ja)으로 플로우 맵 · 화면설계서 엔진 UI도 그 언어로 빌드합니다. 문서 표 머리행도 4개 언어를 모두 읽습니다.
 - 📏 **허접한 초안 금지** — 화면마다 실제 업무 데이터 · 필터 · 상태 · 규칙 · 예외가 있는지 `check_density.mjs`로 잽니다. 기준은 실무 납품 산출물을 잰 하한입니다.
 
 ## 쓰는 흐름 — 단계를 강제하지 않는 하나의 세션
@@ -178,8 +179,8 @@ python -m http.server 8768 --bind 127.0.0.1                     # http://127.0.0
 | `skills/design-canvas` | Claude Design 캔버스: 내보내기 · 게시 · 캔버스 수정 가져오기 · 컴포넌트화 |
 | `skills/artifact-qa` | 로컬 서버 + Chrome 자동 검수, 결과 해석, 보고 형식 |
 | `commands/` | `start` · `status` · `new` · `build` · `audit` · `publish` |
-| `engine/` | 공통 엔진(template.html · sb-head.js · sb-tail.js · sb.css). 프로젝트마다 고치지 않습니다 |
-| `scripts/` | `build_kit.py` · `build_flowmap.py`(문서 파서) · `check_docs.py` · `check_density.mjs` · `export_design.mjs` · `import_design.mjs` · `design_tokens.py` · `audits/` |
+| `engine/` | 공통 엔진(template.html · sb-head.js · sb-tail.js · sb.css · i18n.json 4개 언어 UI 문구). 프로젝트마다 고치지 않습니다 |
+| `scripts/` | `build_kit.py` · `build_flowmap.py`(문서 파서) · `check_docs.py` · `check_density.mjs` · `check_build.mjs` · `export_design.mjs` · `import_design.mjs` · `design_tokens.py` · `audits/` |
 | `templates/project-starter/` | 새 프로젝트 틀(화면 3 · 문서 3종 뼈대) |
 | `templates/intake/` | 진행 기록 · 자료 요청 목록 · 기획 분해 · 디자인 브리프 양식 |
 | `templates/design/` · `templates/design-system/` | 시안 비교(variants.js) · 캔버스 점검(harness.html) · 토큰(tokens.json) · 컴포넌트(components.js) |

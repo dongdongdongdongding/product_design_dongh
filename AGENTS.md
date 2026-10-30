@@ -8,7 +8,8 @@
 2. 작업 표에 적힌 하위 스킬 파일(`skills/<이름>/SKILL.md`)을 그때그때 읽는다. 순서는 강제가 아니다 — 사용자가 원하는 작업부터.
 3. 아이디어만 받아도 `skills/plan-decompose`로 메뉴 · 화면 · 기능 · 컴포넌트 · 동작 · 연결 · 데이터 · 권한 · 예외까지 직접 분해한다. 사용자에게 기획을 묻지 않고 해석을 보여 준다.
 4. 디자인 방향은 글로 묻지 않고 `skills/design-brief`대로 시안 2~4개를 그려 보여 준다. 품질 기준은 `skills/design-system`(레퍼런스 · HIG · 휴리스틱 · 토큰 · 컴포넌트 · 밀도).
-5. 진행 상황은 작업 폴더의 `spec-kit/progress.md`에 기록한다(양식: `templates/intake/progress.md`). 응답 끝에 현황 한 줄과 다음 추천 한 줄.
+5. 사용자 언어(한국어 · English · 中文 · 日本語)로 답하고 산출물도 그 언어로 만든다. `kit.json`의 `"lang"`을 맞추면 엔진 UI도 그 언어로 빌드된다(진입 스킬 "언어" 절).
+6. 진행 상황은 작업 폴더의 `spec-kit/progress.md`에 기록한다(양식: `templates/intake/progress.md`). 응답 끝에 현황 한 줄과 다음 추천 한 줄.
 
 ## Claude 전용 도구 대신 쓰는 것
 

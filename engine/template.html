@@ -13,7 +13,7 @@
   --back: #96A39C; --section: rgba(255, 255, 255, .5); --section-line: rgba(20, 32, 27, .08);
   --card: #FFFFFF; --shadow: 0 1px 2px rgba(20, 32, 27, .06), 0 8px 28px rgba(20, 32, 27, .09);
   --high: #C8361F; --high-soft: #FBE9E5; --mid: #A65A07; --mid-soft: #FDF1DF; --low: #4D5E78; --low-soft: #EBEFF5; --good: #127A5E; --good-soft: #E2F3EC;
-  --ui: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --ui: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "PingFang SC", "Microsoft YaHei", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
@@ -310,7 +310,7 @@ svg.edges.mode-back .e { opacity: .45 }
   const expandIds = (txt) => { const out = []; String(txt).replace(/([A-Z]{2,5})-(\d\d)(?:~(\d\d))?/g, (m, p, a, b) => { for (let i = +a; i <= +(b || a); i++) out.push(p + '-' + String(i).padStart(2, '0')); return m; }); return out; };
   const fieldsFor = (id) => DOC.fields.filter((f) => f.scr === id || (SHARE[id] || []).indexOf(f.scr + ':' + f.key) >= 0);
   const procFor = (s) => DOC.proc.filter((p) => expandIds(p.feat).some((f) => s.feat.indexOf(f) >= 0));
-  const whereChip = (w) => '<span class="chip ' + (/서버/.test(w) ? 'mid' : 'good') + '">' + esc(w) + '</span>';
+  const whereChip = (w) => '<span class="chip ' + (/\uC11C\uBC84|server|服务器|サーバ/i.test(w) ? 'mid' : 'good') + '">' + esc(w) + '</span>';
 
 //__PROJECT_JS__
   // ---------- 프로젝트 데이터에서 파생 ----------
@@ -329,7 +329,7 @@ svg.edges.mode-back .e { opacity: .45 }
     const exchips = s.ex.map((x) => '<span class="chip">' + x + '</span>').join('') + s.at.map((x) => '<span class="chip good">' + x + '</span>').join('');
     return '<h4><b>' + s.id + '</b>' + esc(s.title) + '<small>' + esc(s.kind) + '</small></h4>' +
       '<div><dt>목적</dt><dd>' + esc(s.purpose) + '</dd><dt>기능 ID</dt><dd class="chips">' + fchips + '</dd><dt>연관 예외 · 검수</dt><dd class="chips">' + exchips + '</dd>' +
-      (function () { const fs = fieldsFor(s.id), ws = [...new Set(procFor(s).map((p) => p.where))]; return '<dt>입력 · 처리</dt><dd class="chips"><span class="chip">입력 필드 ' + fs.length + '</span>' + ws.map((w) => '<span class="chip ' + (/서버/.test(w) ? 'mid' : 'good') + '">' + esc(w) + '</span>').join('') + '</dd>'; })() + '</div>' +
+      (function () { const fs = fieldsFor(s.id), ws = [...new Set(procFor(s).map((p) => p.where))]; return '<dt>입력 · 처리</dt><dd class="chips"><span class="chip">입력 필드 ' + fs.length + '</span>' + ws.map((w) => '<span class="chip ' + (/\uC11C\uBC84|server|服务器|サーバ/i.test(w) ? 'mid' : 'good') + '">' + esc(w) + '</span>').join('') + '</dd>'; })() + '</div>' +
       '<div><dt>구성</dt><dd><ul>' + s.parts.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></dd></div>' +
       '<div><dt>상태</dt><dd><ul>' + s.states.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></dd><dt>규칙</dt><dd><ul>' + s.rules.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></dd></div>';
   }
@@ -648,7 +648,7 @@ svg.edges.mode-back .e { opacity: .45 }
       (function () {
         const fs = fieldsFor(s.id), ps = procFor(s);
         let h = '';
-        if (fs.length) h += '<div><h5>입력 필드 <span>' + fs.length + '</span></h5><div class="fl">' + fs.map((f) => '<div><b>' + esc(f.key) + '</b><span>' + esc(f.label) + ' <span class="chip">' + esc(f.type) + '</span> <span class="chip ' + (f.req === '필수' ? 'acc' : '') + '">' + esc(f.req) + '</span><small>' + esc(f.rule) + ' · 기본 ' + esc(f.def) + '</small><small>저장 → ' + esc(f.store) + '</small></span></div>').join('') + '</div></div>';
+        if (fs.length) h += '<div><h5>입력 필드 <span>' + fs.length + '</span></h5><div class="fl">' + fs.map((f) => '<div><b>' + esc(f.key) + '</b><span>' + esc(f.label) + ' <span class="chip">' + esc(f.type) + '</span> <span class="chip ' + (/^(\uD544\uC218|required|yes|必填|必须|必須)$/i.test(f.req) ? 'acc' : '') + '">' + esc(f.req) + '</span><small>' + esc(f.rule) + ' · 기본 ' + esc(f.def) + '</small><small>저장 → ' + esc(f.store) + '</small></span></div>').join('') + '</div></div>';
         if (ps.length) h += '<div><h5>서버 · DB 처리 <span>' + ps.length + '</span></h5><div style="display:grid;gap:6px">' + ps.map((p) => '<div class="uxcard"><div class="tt">' + esc(p.feat) + ' ' + whereChip(p.where) + '</div><div>' + esc(p.target) + '</div><div class="src">운영 영향 · ' + esc(p.impact) + '</div></div>').join('') + '</div><p style="margin:6px 0 0;font-size:12px">후속 실연동 API·DB 제안은 문서 → 입력·서버·DB 탭</p></div>';
         return h;
       })() +
@@ -754,12 +754,12 @@ svg.edges.mode-back .e { opacity: .45 }
     } else if (docTab === 'data') {
       const scrs = [...new Set(DOC.fields.map((f) => f.scr))];
       const fl = DOC.fields.filter((f) => fieldFilter === 'all' || f.scr === fieldFilter);
-      const srvN = DOC.proc.filter((p) => /서버/.test(p.where)).length;
+      const srvN = DOC.proc.filter((p) => /\uC11C\uBC84|server|服务器|サーバ/i.test(p.where)).length;
       h = '<h2>입력값 · 서버 처리 · DB</h2><p class="lead">' + (PROJECT.dataLead || '상세명세 12장. 신규 기능의 입력 필드, 처리 위치, 기존 서버 연동 경계, 후속 API · DB 제안입니다.') + '</p>' +
         '<div class="kpis"><div class="kpi"><span>입력 필드</span><b>' + DOC.fields.length + '</b><small>신규 · 확장 화면</small></div><div class="kpi"><span>브라우저 처리 기능</span><b>' + (DOC.proc.length - srvN) + '</b><small>운영 DB 영향 없음</small></div><div class="kpi"><span>서버 관여 (기존 흐름)</span><b>' + srvN + '</b><small>변경 없음 · 읽기 · 메뉴 등록</small></div><div class="kpi"><span>후속 API · 테이블 제안</span><b>' + DOC.apis.length + ' · ' + DOC.tables.length + '</b><small>F · 이번 미구현</small></div></div>' +
         '<h3 style="margin:18px 0 8px;font-size:15px">12.1 기능별 처리 위치</h3>' + table(['기능', '입력', '처리 위치', '저장 · 조회 대상', '운영 서버 · DB 영향'], DOC.proc.map((p) => '<tr><td class="mono">' + esc(p.feat) + '</td><td>' + esc(p.input) + '</td><td>' + whereChip(p.where) + '</td><td>' + esc(p.target) + '</td><td>' + esc(p.impact) + '</td></tr>')) +
         '<h3 style="margin:18px 0 8px;font-size:15px">12.2 입력 필드</h3><div class="filter">' + ['all'].concat(scrs).map((k) => '<button data-ff="' + k + '" aria-pressed="' + (fieldFilter === k) + '">' + (k === 'all' ? '전체 ' + DOC.fields.length : k + ' ' + DOC.fields.filter((f) => f.scr === k).length) + '</button>').join('') + '</div>' +
-        table(['화면', '필드', '키', '타입', '필수', '검증', '기본값', '저장 위치'], fl.map((f) => '<tr><td class="mono">' + esc(f.scr) + '</td><td><b>' + esc(f.label) + '</b></td><td class="mono">' + esc(f.key) + '</td><td>' + esc(f.type) + '</td><td><span class="chip ' + (f.req === '필수' ? 'acc' : '') + '">' + esc(f.req) + '</span></td><td>' + esc(f.rule) + '</td><td class="mono">' + esc(f.def) + '</td><td class="mono" style="white-space:normal">' + esc(f.store) + '</td></tr>')) +
+        table(['화면', '필드', '키', '타입', '필수', '검증', '기본값', '저장 위치'], fl.map((f) => '<tr><td class="mono">' + esc(f.scr) + '</td><td><b>' + esc(f.label) + '</b></td><td class="mono">' + esc(f.key) + '</td><td>' + esc(f.type) + '</td><td><span class="chip ' + (/^(\uD544\uC218|required|yes|必填|必须|必須)$/i.test(f.req) ? 'acc' : '') + '">' + esc(f.req) + '</span></td><td>' + esc(f.rule) + '</td><td class="mono">' + esc(f.def) + '</td><td class="mono" style="white-space:normal">' + esc(f.store) + '</td></tr>')) +
         '<h3 style="margin:18px 0 8px;font-size:15px">12.3 기존 서버 연동 경계</h3>' + table(['연동', '흐름', '경로', '확인 상태', '이번 처리'], DOC.links.map((l) => '<tr><td><b>' + esc(l.name) + '</b></td><td>' + esc(l.flow) + '</td><td class="mono" style="white-space:normal">' + esc(l.path) + '</td><td>' + esc(l.state) + '</td><td>' + esc(l.how) + '</td></tr>')) +
         '<h3 style="margin:18px 0 8px;font-size:15px">12.4 후속 실연동 API 제안 <span class="chip mid">F · 이번 미구현</span></h3>' + table(['기능', '메서드 · 경로 (제안)', '요청', '응답', '규칙'], DOC.apis.map((a) => '<tr><td><b>' + esc(a.name) + '</b></td><td class="mono" style="white-space:normal">' + esc(a.path) + '</td><td>' + esc(a.req) + '</td><td class="mono" style="white-space:normal">' + esc(a.res) + '</td><td>' + esc(a.rule) + '</td></tr>')) +
         '<h3 style="margin:18px 0 8px;font-size:15px">12.5 후속 DB 테이블 제안 <span class="chip mid">F · MariaDB · 이번 미구현</span></h3>' + table(['테이블 (제안)', '주요 컬럼', '키 · 관계', '비고'], DOC.tables.map((t) => '<tr><td class="mono"><b>' + esc(t.name) + '</b></td><td class="mono" style="white-space:normal">' + esc(t.cols) + '</td><td>' + esc(t.keys) + '</td><td>' + esc(t.note) + '</td></tr>')) +

@@ -21,11 +21,11 @@
     L[id] = [...set];
   }
   try { localStorage.setItem('fmLabels', JSON.stringify(L)); } catch (e) { /* 무시 */ }
-  const vb = [...document.querySelectorAll('#sbIdx button')].find((b) => /최종 검증/.test(b.textContent));
+  const vb = [...document.querySelectorAll('#sbIdx button')].find((b) => /최종 검증|Final check|最终验证|最終検証/.test(b.textContent));   // kit.json lang 4개 언어
   let verify = '(최종 검증 페이지 없음)', fail = 0;
   if (vb) {
     vb.click();
-    const t = document.getElementById('sbSheet').innerText, i = t.indexOf('2. 자동 검사'), j = t.indexOf('\n3. ', i + 3);
+    const t = document.getElementById('sbSheet').innerText, i = t.search(/2\. (자동 검사|Automatic checks|自动检查|自動検査)/), j = t.indexOf('\n3. ', i + 3);
     verify = t.slice(i, j > 0 ? j : undefined).trim();
     fail = document.querySelectorAll('#sbSheet .sh-chip.new').length;
   }

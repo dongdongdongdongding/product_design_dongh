@@ -11,6 +11,8 @@
 - `scripts/import_design.mjs` · `scripts/dc-lib.mjs`: Claude Design 캔버스에서 고친 보드를 `design-import/`로 가져와 빌드 · 내보내기에 반영(data-go ↔ 링크 왕복).
 - `scripts/design_tokens.py`(inventory · css · link · contrast · check), `templates/design-system/tokens.json` · `components.js`, 캔버스 `DS-tokens` · `DS-components` 보드.
 - `scripts/check_density.mjs`: 화면별 요소 · 글자 · 구성 · 상태 · 규칙 · 예외 · 검수 밀도 하한 검사.
+- 4개 언어(한국어 · English · 中文 · 日本語): `kit.json` `"lang"` → 엔진 UI 번역(`engine/i18n.json`, 389문구), 문서 표 머리행 4개 언어 인식, 언어별 글꼴 순서, 스킬 설명에 영어 · 중국어 · 일본어 트리거, `README.en.md` · `README.zh-CN.md` · `README.ja.md`.
+- `scripts/check_build.mjs`: 빌드한 HTML의 스크립트 문법 검사(번역문 따옴표 사고 방지).
 - `harness.html?boards=…`: Claude Design이 없는 환경에서 보드를 나란히 보기, 보드별 높이 반영, 푸터 겹침 검사.
 
 ### 바뀜

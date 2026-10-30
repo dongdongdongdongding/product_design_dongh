@@ -55,7 +55,7 @@
   function sbVerify() {
     const ids = (txt) => expandIds(txt), onScr = (f) => SCREENS.filter((s) => s.feat.indexOf(f) >= 0).map((s) => s.id);
     const ok = (b, t) => '<span class="sh-chip ' + (b ? 'old' : 'new') + '">' + (t || (b ? '충족' : '확인 필요')) + '</span>';
-    const rtm = DOC.rtm.map((r) => { const fs = ids(r.ids), sc = [...new Set([].concat(...fs.map(onScr)))]; const pass = r.ids.indexOf('전체') >= 0 || (fs.length > 0 && fs.every((f) => FEAT[f])); return { r: r, fs: fs, sc: sc, pass: pass }; });
+    const rtm = DOC.rtm.map((r) => { const fs = ids(r.ids), sc = [...new Set([].concat(...fs.map(onScr)))]; const pass = /^\s*(\uC804\uCCB4|all|全部|すべて|全体)\s*$/i.test(r.ids) || (fs.length > 0 && fs.every((f) => FEAT[f])); return { r: r, fs: fs, sc: sc, pass: pass }; });
     const CROSS = CONF.crossFeatures || {}; const noScreen = DOC.features.filter((f) => !onScr(f.id).length && !CROSS[f.id]);
     const scrText = {}; SCREENS.forEach((s) => { const d = document.createElement('div'); d.innerHTML = H[s.id](); d.querySelectorAll('.dimmed').forEach((x) => x.remove()); scrText[s.id] = d.textContent.replace(/\s+/g, ''); });
     const norm = (x) => x.replace(/\([^)]*\)/g, '').replace(/[\s·]/g, '');
@@ -87,8 +87,8 @@
   const sbLabel = (i) => SBP[i].no + ' ' + (SBP[i].scr && SBP[i].kind === 'scr' ? SBP[i].scr + ' ' : '') + SBP[i].title;
   const rt = (s) => esc(s)
     .replace(/&quot;(.+?)&quot;/g, '<q>$1</q>')
-    .replace(/\{저장\}/g, '<span class="tk save">저장</span>').replace(/\{서버\}/g, '<span class="tk srv">서버</span>')
-    .replace(/\{기존\}/g, '<span class="tk old">기존 유지</span>').replace(/\{조건부\}/g, '<span class="tk cond">조건부</span>')
+    .replace(/\{(\uC800\uC7A5|save|保存)\}/gi, '<span class="tk save">저장</span>').replace(/\{(\uC11C\uBC84|server|服务器|サーバー?)\}/gi, '<span class="tk srv">서버</span>')
+    .replace(/\{(\uAE30\uC874|existing|现有|既存)\}/gi, '<span class="tk old">기존 유지</span>').replace(/\{(\uC870\uAC74\uBD80|cond|conditional|有条件|条件付き)\}/gi, '<span class="tk cond">조건부</span>')
     .replace(/\{(EX-\d\d)\}/g, (m, id) => '<span class="tk ex" title="' + esc(EXM[id] ? EXM[id].sit + ' → ' + EXM[id].how : '') + '">' + id + '</span>')
     .replace(/\{→#([\w-]+)\}/g, (m, k) => { const i = SBP.findIndex((p) => p.id === k || (p.kind === 'scr' && p.scr === k)); return i < 0 ? k : '<span class="tk go" data-sb="' + i + '" role="link" tabindex="0">→ ' + esc(sbLabel(i)) + '</span>'; })
     .replace(/\{→([A-Z]\d|SB-\d\d)\}/g, (m, k) => { const i = sbOf(k); return i < 0 ? k : '<span class="tk go" data-sb="' + i + '" role="link" tabindex="0">→ ' + esc(sbLabel(i)) + '</span>'; });
@@ -176,7 +176,7 @@
     else if (p.kind === 'mx') h += p.mx.map(mxTable).join('') + ctxBox(p);
     else {
       h += '<div class="sh-body"><div><div class="sb-shot" id="sbShot"></div>' + (p.subs ? '<div class="subs">' + p.subs.map((s) => '<div class="sub" data-n="' + s.n.split('-')[0] + '"><span class="sn">' + s.n + '</span><div class="scap">' + esc(s.cap) + '</div>' + s.html + '</div>').join('') + '</div>' : '') + '</div>' +
-        '<div class="desc"><div class="dh">Description</div>' + p.marks.map((m) => '<div class="dr" data-n="' + m.n + '"><div class="dt"><b>' + m.n + '</b>' + esc(m.t) + '</div>' + bullets(/지도/.test(m.t) ? m.b.concat(['그리는 기준은 {→#map} (상세명세 13장)']) : m.b) + ((p.subs || []).filter((s) => s.n.split('-')[0] === m.n).map((s) => '<div class="lb">' + s.n + '. ' + esc(s.cap) + '</div>').join('')) + '</div>').join('') + '</div></div>' +
+        '<div class="desc"><div class="dh">Description</div>' + p.marks.map((m) => '<div class="dr" data-n="' + m.n + '"><div class="dt"><b>' + m.n + '</b>' + esc(m.t) + '</div>' + bullets(/\uC9C0\uB3C4|map|地图|地図|マップ/i.test(m.t) ? m.b.concat(['그리는 기준은 {→#map} (상세명세 13장)']) : m.b) + ((p.subs || []).filter((s) => s.n.split('-')[0] === m.n).map((s) => '<div class="lb">' + s.n + '. ' + esc(s.cap) + '</div>').join('')) + '</div>').join('') + '</div></div>' +
         (p.mx ? '<div style="margin-top:18px">' + p.mx.map(mxTable).join('') + '</div>' : '') + ctxBox(p);
     }
     box.innerHTML = h;

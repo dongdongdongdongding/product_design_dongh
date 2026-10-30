@@ -1,6 +1,6 @@
 /* 화면 시안 테마 — 배포 사이트에서 잰 값으로 바꾼다(색 · 글꼴 · 사이드바 · 카드 · 버튼 · 입력 · 배지 · 지도 오버레이).
    클래스 이름(.scr .sb .nv .tp .ct .ph .c .ch .btn .inp .sel .lab .seg .tg .note .t .mapw …)은 엔진 · 검수가 쓰므로 유지한다. */
-.scr { width: 1440px; height: 900px; position: relative; background: #F9FAFB; color: #000000; font: 14px/1.5 "Overpass", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: 60px minmax(0, 1fr) 40px; overflow: hidden; text-align: left }
+.scr { width: 1440px; height: 900px; position: relative; background: #F9FAFB; color: #000000; font: 14px/1.5 "Overpass", "Malgun Gothic", "Apple SD Gothic Neo", "PingFang SC", "Microsoft YaHei", "Hiragino Sans", "Yu Gothic", sans-serif; display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: 60px minmax(0, 1fr) 40px; overflow: hidden; text-align: left }
 .scr * { box-sizing: border-box }
 .scr .sb { grid-row: 1 / 4; background: #FFFFFF; box-shadow: 0 8px 10px 0 rgba(183, 192, 206, .2); z-index: 1; display: flex; flex-direction: column }
 .scr .sbh { height: 60px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F2F4F9 }

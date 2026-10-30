@@ -59,7 +59,7 @@ def main():
     (fails if nc else ok).append('검수에 연결 안 된 예외: %s' % (nc or '없음') + ' (전체 %d)' % len(exn))
     bad = []
     for r in d['rtm']:
-        if '전체' in r['ids']:
+        if re.search(r'전체|^\s*all\s*$|全部|すべて|全体', r['ids'], re.I):
             continue
         xs = expand(r['ids'])
         if not xs or any(x not in ids for x in xs):

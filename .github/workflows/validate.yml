@@ -40,6 +40,15 @@ jobs:
         run: python scripts/check_docs.py --docs templates/project-starter/docs
       - name: build demo
         run: python scripts/build_kit.py examples/demo-park
+      - name: build in en · zh · ja (engine UI translation)
+        run: |
+          for L in en zh ja; do
+            rm -rf /tmp/l-$L && cp -r examples/demo-park /tmp/l-$L
+            python -c "import json,sys; p='/tmp/l-$L/kit.json'; k=json.load(open(p,encoding='utf8')); k['lang']='$L'; json.dump(k,open(p,'w',encoding='utf8'),ensure_ascii=False)"
+            python scripts/build_kit.py /tmp/l-$L | tee /tmp/l-$L.log
+            grep -q '번역 안 된 엔진 문구 0개' /tmp/l-$L.log
+          done
+          node scripts/check_build.mjs examples/demo-park/flowmap.html /tmp/l-en/flowmap.html /tmp/l-zh/flowmap.html /tmp/l-ja/flowmap.html
       - name: build starter
         run: python scripts/build_kit.py templates/project-starter
       - name: planning density (demo)
