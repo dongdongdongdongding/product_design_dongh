@@ -42,7 +42,7 @@ def main():
                         data = f.read_text(encoding='utf8') if f.name == 'SKILL.md' else None
                         arc = (Path(n) / f.relative_to(SKILLS / n)).as_posix()
                         if data is not None:
-                            zf.writestr(arc, data.rstrip('\n') + '\n\nKIT_ROOT: (claude.ai에서는 저장소 파일을 대화에 첨부하거나 github.com/donghk-cloud/screen-spec-kit 를 참고)\n')
+                            zf.writestr(arc, data.rstrip('\n') + '\n\nKIT_ROOT: (claude.ai에서는 저장소 파일을 대화에 첨부하거나 github.com/dongdongdongdongding/product_design_dongh 를 참고)\n')
                         else:
                             zf.write(f, arc)
             print('ok', z)

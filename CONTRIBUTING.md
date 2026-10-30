@@ -5,7 +5,7 @@
 ## 시작
 
 ```bash
-git clone https://github.com/donghk-cloud/screen-spec-kit && cd screen-spec-kit
+git clone https://github.com/dongdongdongdongding/product_design_dongh && cd product_design_dongh
 python scripts/check_docs.py --docs examples/demo-park/docs --screens D1,F1,F2,B1,B2
 python scripts/build_kit.py examples/demo-park
 python -m http.server 8768 --bind 127.0.0.1

@@ -14,8 +14,8 @@
 [![version](https://img.shields.io/badge/version-1.3.0-1F7A52)](CHANGELOG.md)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-D97757)](https://code.claude.com/docs/en/plugins)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![validate](https://github.com/donghk-cloud/screen-spec-kit/actions/workflows/validate.yml/badge.svg)](https://github.com/donghk-cloud/screen-spec-kit/actions/workflows/validate.yml)
-[![stars](https://img.shields.io/github/stars/donghk-cloud/screen-spec-kit?style=social)](https://github.com/donghk-cloud/screen-spec-kit/stargazers)
+[![validate](https://github.com/dongdongdongdongding/product_design_dongh/actions/workflows/validate.yml/badge.svg)](https://github.com/dongdongdongdongding/product_design_dongh/actions/workflows/validate.yml)
+[![stars](https://img.shields.io/github/stars/dongdongdongdongding/product_design_dongh?style=social)](https://github.com/dongdongdongdongding/product_design_dongh/stargazers)
 
 <img src="docs/media/flowmap-overview.jpg" alt="플로우 맵: 메뉴별 섹션, 화면 프레임, 자동 경로 연결선, 오른쪽 인스펙터" width="100%">
 
@@ -113,10 +113,10 @@ artifact-qa (check_density · design_tokens check · audits/*.js · harness.html
 
 ```bash
 # Claude Code 안에서 (2.1.275 이상)
-/plugin install product_design_dongh --marketplace donghk-cloud/screen-spec-kit
+/plugin install product_design_dongh --marketplace dongdongdongdongding/product_design_dongh
 
 # 이전 버전
-/plugin marketplace add donghk-cloud/screen-spec-kit
+/plugin marketplace add dongdongdongdongding/product_design_dongh
 /plugin install product_design_dongh@product_design_dongh
 ```
 
@@ -125,8 +125,8 @@ artifact-qa (check_density · design_tokens check · audits/*.js · harness.html
 ### Codex
 
 ```bash
-git clone https://github.com/donghk-cloud/screen-spec-kit
-python screen-spec-kit/scripts/install_skills.py --codex     # → ~/.agents/skills/
+git clone https://github.com/dongdongdongdongding/product_design_dongh
+python product_design_dongh/scripts/install_skills.py --codex     # → ~/.agents/skills/
 ```
 Codex를 다시 시작한 뒤 `$screen-spec-kit` 또는 "기획서로 화면설계서 만들어줘"라고 합니다. 저장소 안에서 Codex를 열면 [`AGENTS.md`](AGENTS.md)가 같은 흐름을 안내합니다. 브라우저 검수 · Artifact 게시 대신 로컬 서버 주소와 파일로 결과를 보여 줍니다.
 
@@ -150,7 +150,7 @@ Codex를 다시 시작한 뒤 `$screen-spec-kit` 또는 "기획서로 화면설�
 ### 예시를 직접 빌드해 보기
 
 ```bash
-git clone https://github.com/donghk-cloud/screen-spec-kit && cd screen-spec-kit
+git clone https://github.com/dongdongdongdongding/product_design_dongh && cd product_design_dongh
 python scripts/check_docs.py --docs examples/demo-park/docs --screens D1,F1,F2,B1,B2,C1
 node scripts/check_density.mjs examples/demo-park              # 기획 밀도 — 미달 0
 python scripts/design_tokens.py check examples/demo-park       # 토큰 반영 · 대비
@@ -222,4 +222,4 @@ python -m http.server 8768 --bind 127.0.0.1                     # http://127.0.0
 
 ## 라이선스
 
-[MIT](LICENSE) © donghk-cloud. 예시의 서비스 · 기관 · 인물은 모두 가상입니다.
+[MIT](LICENSE) © dongdongdongdongding. 예시의 서비스 · 기관 · 인물은 모두 가상입니다.
