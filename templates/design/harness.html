@@ -3,12 +3,16 @@
 <head>
 <meta charset="utf-8">
 <title>dc 검수</title>
-<!-- 사용: 이 파일을 디자인 폴더(project/ 의 부모)에 두고 http://127.0.0.1:<port>/harness.html 로 연다. renderAll(['Main', ...]) 후 audit() -->
+<!-- 사용: 이 파일을 디자인 폴더(project/ 의 부모)에 두고 http://127.0.0.1:<port>/harness.html 로 연다.
+     보기: harness.html?boards=V-A,V-B,V-C  (보드를 이름표와 함께 나란히 — Claude Design이 없는 환경의 시안 비교용)
+     검수: renderAll(['Main', ...]) 후 audit() -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@300;400;600;700;800&display=swap">
 <style>
 body { margin: 0; background: #DDD }
 .board { position: relative; width: 1440px; height: 940px; overflow: hidden; background: #FFF; margin: 0 0 40px }
 .board > .dcroot { width: 100%; height: 100% }
+.boardlab { font: 700 20px/1.4 system-ui, sans-serif; margin: 24px 0 8px }
+.view #out { display: flex; flex-wrap: wrap; gap: 0 40px; padding: 0 40px }
 </style>
 </head>
 <body>
@@ -60,6 +64,7 @@ window.renderBoard = async (name) => {
   const b = document.createElement('div'); b.className = 'board'; b.dataset.name = name;
   const r = document.createElement('div'); r.className = 'dcroot'; b.appendChild(r);
   document.getElementById('out').appendChild(b);
+  const pv = (await load(name)).preview; if (pv && pv.height) b.style.height = pv.height + 'px';   // 보드마다 선언한 높이(DS 보드는 940보다 길다)
   await renderInto(name, {}, r); return b;
 };
 
@@ -71,17 +76,21 @@ window.audit = () => {
   const own=(x)=>!x.closest('.dimmed') && !(isOverlay&&x.closest('.dcimport'));
   const els=[...b.querySelectorAll('*')].filter(x=>!(x.closest('svg')&&x.tagName.toLowerCase()!=='svg') && !x.closest('.dcimport[data-name=Map]') && own(x));
   let worst=0, wEl=null; els.forEach(x=>{ const r=x.getBoundingClientRect(); const o=r.bottom-B.bottom; if(r.height&&o>1&&(x.classList.contains('card') || x.classList.contains('c'))) out.push(nm+' | 보드 아래로 잘린 카드 | "'+T(x)+'" '+Math.round(o)+'px'); if(o>worst){worst=o;wEl=x;} });
-  if(worst>1) out.push(nm+' | 보드(940) 아래로 넘침 '+Math.round(worst)+'px ('+(wEl.className||wEl.tagName)+')');
+  if(worst>1) out.push(nm+' | 보드 아래로 넘침 '+Math.round(worst)+'px ('+(wEl.className||wEl.tagName)+')');
   els.forEach(x=>{ const box=x.parentElement&&x.parentElement.closest('.card, .c, .modal, .mapbox, .mapw, .list, .lbox, .toast'); if(!box) return; const r=x.getBoundingClientRect(), q=box.getBoundingClientRect(); const o=Math.max(r.right-q.right,q.left-r.left,r.bottom-q.bottom); if(r.width>0&&o>2) out.push(nm+' | 영역 밖으로 넘침 | '+(x.className||x.tagName)+' "'+T(x)+'" '+Math.round(o)+'px (in '+box.className+')'); });
   els.forEach(x=>{ if(x.tagName.toLowerCase()==='svg') return; const cs=getComputedStyle(x); if(cs.position==='absolute'&&cs.clip!=='auto') return; if((cs.overflowX!=='visible'||cs.overflowY!=='visible') && cs.textOverflow!=='ellipsis' && !x.classList.contains('board') && !x.classList.contains('mapbox') && !x.classList.contains('mapw') && !x.classList.contains('scr') && (x.scrollWidth>x.clientWidth+2||x.scrollHeight>x.clientHeight+2)) out.push(nm+' | 내용 잘림(스크롤/숨김) | '+(x.className||x.tagName)+' "'+T(x)+'" '+(x.scrollWidth-x.clientWidth)+'×'+(x.scrollHeight-x.clientHeight)); });
   const cs=[...b.querySelectorAll('.card, .c, .note, .crumbs, .ph, .tabs, .tabsx, .row, .grid2, .grid3, .grid4')].filter(own);
   for(let i=0;i<cs.length;i++)for(let j=i+1;j<cs.length;j++){const A=cs[i],C=cs[j]; if(A.contains(C)||C.contains(A)) continue; const P=A.getBoundingClientRect(),Q=C.getBoundingClientRect(); const ox=Math.min(P.right,Q.right)-Math.max(P.left,Q.left), oy=Math.min(P.bottom,Q.bottom)-Math.max(P.top,Q.top); if(ox>2&&oy>2) out.push(nm+' | 영역끼리 겹침 | "'+T(A)+'" × "'+T(C)+'" '+Math.round(ox)+'×'+Math.round(oy)); }
+  const fr=b.querySelector('.ftr'); if(fr){ const ft=fr.getBoundingClientRect().top; b.querySelectorAll('.c').forEach(c=>{ if(!own(c)) return; const o=c.getBoundingClientRect().bottom-ft; if(o>2) out.push(nm+' | 하단 바(푸터)와 겹침 | "'+T(c)+'" '+Math.round(o)+'px'); }); }
   const ct=[...b.querySelectorAll('.content, .ct')].filter(own)[0]; if(ct){ const q=ct.getBoundingClientRect(); let mb=q.top; [...ct.children].forEach(c=>{mb=Math.max(mb,c.getBoundingClientRect().bottom)}); const gap=Math.min(q.bottom,B.bottom-40)-mb; if(gap>60) out.push(nm+' | 하단 빈 공간 | '+Math.round(gap)+'px'); }
   b.querySelectorAll('.card, .c').forEach(c=>{ if(!own(c)) return; const q=c.getBoundingClientRect(); const kids=[...c.children].map(k=>k.getBoundingClientRect()).filter(r=>r.height>0).sort((a,b)=>a.top-b.top); let gapMax=0, prev=q.top+20; kids.forEach(r=>{ gapMax=Math.max(gapMax, r.top-prev); prev=Math.max(prev,r.bottom); }); gapMax=Math.max(gapMax, q.bottom-20-prev); if(gapMax>80) out.push(nm+' | 카드 안 빈 공간 | "'+T(c)+'" '+Math.round(gapMax)+'px'); });
   const txt=b.innerText.replace(/\s+/g,' '); const lab=FL[MAP[nm]]||[]; const miss=lab.filter(t=>!txt.includes(t) && !txt.replace(/ /g,'').includes(t.replace(/ /g,''))); if(miss.length) out.push(nm+' | 플로우 맵 대비 없음 | '+miss.join(' / '));
  }
  return [...new Set(out)].join('\n');
 };
+// ?boards=A,B → 이름표를 붙여 나란히 그린다(보드 <title>을 이름표로)
+(async () => { const q = new URLSearchParams(location.search).get('boards'); if (!q) return; document.body.classList.add('view');
+  for (const n of q.split(',')) { const w = document.createElement('div'); const t = await (await fetch('project/' + n + '.dc.html')).text(); const lab = document.createElement('div'); lab.className = 'boardlab'; lab.textContent = (/<title>([^<]*)/.exec(t) || [, n])[1]; w.appendChild(lab); document.getElementById('out').appendChild(w); const b = await renderBoard(n); w.appendChild(b); } })();
 window.renderAll = async (names) => { document.getElementById('out').innerHTML=''; for (const k in cache) delete cache[k]; for (const n of names) await renderBoard(n); await document.fonts.ready; return 'ok'; };
 
 </script>

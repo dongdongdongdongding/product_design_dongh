@@ -2,6 +2,24 @@
 
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르고, 버전은 [SemVer](https://semver.org/lang/ko/)를 씁니다.
 
+## [1.3.0] - 2026-10-30
+
+### 추가
+- `plan-decompose` 스킬 · `templates/intake/기획분해.md`: 기획서 · 요구사항 정의서 · 아이디어 한 줄을 역할 → 메뉴 → 화면 → 기능 → 컴포넌트 · 동작 → 연결 → 데이터 · 상태 · 권한 → 예외 → 기본 결정까지 분해.
+- `design-system` 스킬: 외부 레퍼런스 조사, Apple HIG 원칙 · 수치, 닐슨 휴리스틱 평가, 디자인 토큰(W3C DTCG), 컴포넌트 × 상태, 기획 밀도 기준.
+- 시안 비교: `variants.js` → 캔버스 맨 위 `V-*` 보드. `templates/design/variants.js`.
+- `scripts/import_design.mjs` · `scripts/dc-lib.mjs`: Claude Design 캔버스에서 고친 보드를 `design-import/`로 가져와 빌드 · 내보내기에 반영(data-go ↔ 링크 왕복).
+- `scripts/design_tokens.py`(inventory · css · link · contrast · check), `templates/design-system/tokens.json` · `components.js`, 캔버스 `DS-tokens` · `DS-components` 보드.
+- `scripts/check_density.mjs`: 화면별 요소 · 글자 · 구성 · 상태 · 규칙 · 예외 · 검수 밀도 하한 검사.
+- `harness.html?boards=…`: Claude Design이 없는 환경에서 보드를 나란히 보기, 보드별 높이 반영, 푸터 겹침 검사.
+
+### 바뀜
+- 진입 스킬: 0~7단계 강제를 없애고 작업 메뉴 · 하나의 세션으로. 멈추는 곳은 분해 확인 · 시안 선택 · 범위 증가뿐, 응답마다 현황 줄.
+- `design-brief`: 글 질문 대신 레퍼런스 + 시안 2~4개를 캔버스로 보여 주고 고르기. 묻는 것은 그림으로 알 수 없는 것(0~4개)만.
+- `draft-review`: 초안을 디자인 캔버스와 플로우 맵 둘 다로, 보여 주기 전 밀도 · 휴리스틱 자체 점검, 캔버스 수정 가져오기.
+- `design-canvas`: 시안 비교부터 같은 Artifact URL에 쌓기, 갱신 전 사용자 수정 가져오기.
+- 예시 `demo-park` v1.2: 화면 6(공통 상태 추가) · 예외 15 · 검수 6 · 선택 승인 · 시안 3 · 토큰 · 컴포넌트. 주 색 #2E9E6B → #1F7A52(흰 글자 대비 3.4 → 5.3).
+
 ## [1.2.0] - 2026-10-29
 
 ### 추가

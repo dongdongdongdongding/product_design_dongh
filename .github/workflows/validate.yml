@@ -18,7 +18,7 @@ jobs:
           node-version: '20'
       - name: plugin manifest JSON
         run: |
-          python -c "import json; json.load(open('.claude-plugin/plugin.json')); json.load(open('.claude-plugin/marketplace.json'))"
+          python -c "import json; json.load(open('.claude-plugin/plugin.json')); json.load(open('.claude-plugin/marketplace.json')); json.load(open('templates/design-system/tokens.json', encoding='utf8'))"
       - name: skill / command frontmatter
         run: |
           pip install pyyaml -q
@@ -35,15 +35,30 @@ jobs:
       - name: install script (dry run)
         run: python scripts/install_skills.py --to /tmp/skills && test -f /tmp/skills/screen-spec-kit/SKILL.md
       - name: docs consistency (demo)
-        run: python scripts/check_docs.py --docs examples/demo-park/docs --screens D1,F1,F2,B1,B2
+        run: python scripts/check_docs.py --docs examples/demo-park/docs --screens D1,F1,F2,B1,B2,C1
       - name: docs consistency (starter)
         run: python scripts/check_docs.py --docs templates/project-starter/docs
       - name: build demo
         run: python scripts/build_kit.py examples/demo-park
       - name: build starter
         run: python scripts/build_kit.py templates/project-starter
-      - name: export design
-        run: node scripts/export_design.mjs examples/demo-park /tmp/design-out
+      - name: planning density (demo)
+        run: node scripts/check_density.mjs examples/demo-park
+      - name: design tokens (demo)
+        run: python scripts/design_tokens.py check examples/demo-park
+      - name: export design (variants · screens · DS boards)
+        run: |
+          node scripts/export_design.mjs examples/demo-park /tmp/design-out
+          for b in V-A V-B V-C D1 C1 DS-tokens DS-components; do test -f /tmp/design-out/project/$b.dc.html || exit 1; done
+          node scripts/export_design.mjs templates/project-starter /tmp/starter-design --variants-only
+      - name: canvas import round trip
+        run: |
+          node --input-type=module -e "import {loadProject,linkify,unlinkify} from './scripts/dc-lib.mjs'; for (const d of ['examples/demo-park','templates/project-starter']) { const p = loadProject(d); for (const id of Object.keys(p.H)) { const h = p.H[id](); if (unlinkify(linkify(h)) !== h) { console.error('round trip', d, id); process.exit(1); } } } console.log('round trip ok')"
+          cp -r examples/demo-park /tmp/demo && sed -i 's/시설명 검색/시설명 · 유형 검색/' /tmp/design-out/project/F1.dc.html
+          node scripts/import_design.mjs /tmp/design-out /tmp/demo --apply
+          test -f /tmp/demo/design-import/F1.html
+          python scripts/build_kit.py /tmp/demo | grep -q 'design-import 1화면'
+          grep -q '시설명 · 유형 검색' /tmp/demo/flowmap.html
       - name: JS syntax
         run: |
-          for f in engine/*.js scripts/audits/*.js examples/demo-park/*.js templates/project-starter/*.js; do node --check "$f" 2>/dev/null || node -e "new Function(require('fs').readFileSync('$f','utf8'))" || exit 1; done
+          for f in engine/*.js scripts/audits/*.js examples/demo-park/*.js examples/demo-park/design-system/*.js templates/project-starter/*.js templates/design/*.js templates/design-system/*.js; do node --check "$f" 2>/dev/null || node -e "new Function(require('fs').readFileSync('$f','utf8'))" || exit 1; done

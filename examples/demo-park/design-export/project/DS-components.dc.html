@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>컴포넌트</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@300;400;600;700;800&amp;display=swap">
+<style>body{margin:0} a{color:inherit}</style>
+</helmet>
+<div class="scr" style="display:block;height:auto;min-height:900px;padding:48px 56px;overflow:visible;box-sizing:border-box"><h1 style="font-size:24px;margin:0 0 4px">컴포넌트</h1><p style="margin:0 0 24px;color:#6B7482">design-system/components.js · 상태별 모양</p><table style="border-collapse:separate;border-spacing:0 14px"><tr><td style="padding:0 24px 0 0;vertical-align:top;width:200px"><b>버튼</b><div style="font-size:11px;color:#6B7482">주 버튼은 화면마다 하나, 오른쪽 끝</div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">주</div><span class="btn pri">저장</span></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">보조</div><span class="btn">취소</span></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">위험</div><span class="btn danger">반려</span></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">비활성(권한 없음)</div><span class="btn pri dis">승인</span></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">작게</div><span class="btn sm">수정</span></td></tr><tr><td style="padding:0 24px 0 0;vertical-align:top;width:200px"><b>입력</b><div style="font-size:11px;color:#6B7482">라벨 위, 오류는 입력 아래</div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">기본</div><div><div class="lab">시설명 <em>*</em></div><div class="inp">캠핑장 A구역</div></div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">빈 값</div><div><div class="lab">안내 문구</div><div class="inp ph-t">시민에게 보이는 안내</div></div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">오류</div><div><div class="lab">수용 인원</div><div class="inp err">0</div><div class="msg err">1 이상의 숫자를 입력하세요.</div></div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">읽기 전용</div><div><div class="lab">등록일</div><div class="inp ro">2026-10-28</div></div></td></tr><tr><td style="padding:0 24px 0 0;vertical-align:top;width:200px"><b>선택 · 세그먼트</b></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">선택</div><div><div class="lab">유형</div><div class="sel">캠핑</div></div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">세그먼트</div><div class="seg"><span class="on">운영</span><span class="">점검 중</span></div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">상태 탭</div><div class="seg"><span class="">전체 18</span><span class="on">승인 대기 4</span><span class="">승인 12</span><span class="">반려 2</span></div></td></tr><tr><td style="padding:0 24px 0 0;vertical-align:top;width:200px"><b>상태 배지</b><div style="font-size:11px;color:#6B7482">예약 · 시설 상태</div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">운영 · 승인</div><span class="tg t-ok">운영</span></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">대기 · 점검</div><span class="tg t-wr">승인 대기</span></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">반려</div><span class="tg">반려</span></td></tr><tr><td style="padding:0 24px 0 0;vertical-align:top;width:200px"><b>안내</b><div style="font-size:11px;color:#6B7482">공통 상태 (SCR-C1)</div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">정보</div><div class="note i">핀을 누르면 수정 화면으로 갑니다.</div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">성공</div><div class="note g">저장했습니다.</div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">주의</div><div class="note w">이미 처리된 예약입니다.</div></td><td style="padding:0 20px 0 0;vertical-align:top"><div style="font-size:11px;color:#6B7482;margin:0 0 6px">오류</div><div class="note e">불러오지 못했습니다.</div></td></tr></table></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

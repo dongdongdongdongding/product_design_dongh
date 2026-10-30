@@ -36,10 +36,15 @@ def main():
         if len(data[k]) != int(v):
             raise SystemExit('개수 불일치: %s = %d (kit.json expect %s)' % (k, len(data[k]), v))
     rd = lambda n: (P / n).read_text(encoding='utf8')
+    # 캔버스에서 가져온 화면(design-import/<ID>.html, import_design.mjs가 만든다)은 H[ID]보다 우선한다 — export_design.mjs와 같은 규칙
+    imp = P / 'design-import'
+    over = {f.stem: f.read_text(encoding='utf8') for f in sorted(imp.glob('*.html'))} if imp.is_dir() else {}
+    css = '\n'.join(f.read_text(encoding='utf8') for f in sorted(imp.glob('*.css'))) if imp.is_dir() else ''
+    pjs = rd('project.js') + ('\n;(function (O) { for (const k in O) H[k] = () => O[k]; })(' + json.dumps(over, ensure_ascii=False).replace('</', '<\\/') + ');\n' if over else '')
     html = (ENGINE / 'template.html').read_text(encoding='utf8')
     sbjs = (ENGINE / 'sb-head.js').read_text(encoding='utf8') + '\n' + rd('sb-pages.js') + '\n' + (ENGINE / 'sb-tail.js').read_text(encoding='utf8')
-    for k, v in [('/*__THEME_CSS__*/', rd('theme.css')), ('/*__SBCSS__*/', (ENGINE / 'sb.css').read_text(encoding='utf8')),
-                 ('//__PROJECT_JS__', rd('project.js')), ('//__SBJS__', sbjs),
+    for k, v in [('/*__THEME_CSS__*/', rd('theme.css') + ('\n' + css if css else '')), ('/*__SBCSS__*/', (ENGINE / 'sb.css').read_text(encoding='utf8')),
+                 ('//__PROJECT_JS__', pjs), ('//__SBJS__', sbjs),
                  ('__TITLE__', cfg.get('title', '플로우 맵')), ('__SUBTITLE__', cfg.get('subtitle', '')),
                  ('__DOCS_TITLE__', cfg.get('docsTitle', '문서')), ('__DOCS_SUB__', cfg.get('docsSub', ''))]:
         if k not in html:
@@ -48,7 +53,7 @@ def main():
     html = html.replace('__DOCDATA__', json.dumps(data, ensure_ascii=False).replace('</', '<\\/'))
     out = P / cfg.get('out', 'flowmap.html')
     out.write_text(html, encoding='utf8')
-    print('ok %s · features=%d ex=%d at=%d rtm=%d fields=%d map.scr=%d wbs=%.1f · %d bytes' % (out.name, len(data['features']), len(data['ex']), len(data['at']), len(data['rtm']), len(data['fields']), len(data['map']['scr']), data['wbsBase'], len(html)))
+    print(('design-import %d화면 우선 · ' % len(over) if over else '') + 'ok %s · features=%d ex=%d at=%d rtm=%d fields=%d map.scr=%d wbs=%.1f · %d bytes' % (out.name, len(data['features']), len(data['ex']), len(data['at']), len(data['rtm']), len(data['fields']), len(data['map']['scr']), data['wbsBase'], len(html)))
 
 
 if __name__ == '__main__':

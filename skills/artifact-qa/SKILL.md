@@ -5,7 +5,7 @@ description: 플로우 맵 · 화면설계서 · 디자인 캔버스를 로컬�
 
 # 검수와 최종 검증
 
-〔7/7 검수 · 전달〕 끝나면 `progress.md` 7단계를 체크하고, 결과 링크 · 파일과 남은 확인 사항(가정 목록)을 함께 보고한다. 브라우저 도구가 없으면 `check_docs.py` · 빌드 숫자로 대신하고 그렇게 했다고 말한다.
+끝나면 `progress.md`의 현황을 갱신하고, 결과 링크 · 파일과 남은 확인 사항(가정 목록)을 함께 보고한다. 브라우저 도구가 없으면 `check_docs.py` · 빌드 숫자로 대신하고 그렇게 했다고 말한다.
 
 눈으로 한 화면씩 보는 대신 스크립트로 전부 재고, 남은 것만 눈으로 본다. 결과를 사용자에게 말할 때는 숫자(몇 건 → 0건)와 남긴 것의 이유를 함께 말한다.
 
@@ -14,6 +14,8 @@ description: 플로우 맵 · 화면설계서 · 디자인 캔버스를 로컬�
 ```bash
 python -I scripts/check_docs.py --docs <docs> --screens D1,...      # 문서 정합
 python -I scripts/build_kit.py <프로젝트 폴더>                        # 빌드
+node scripts/check_density.mjs <프로젝트 폴더>                        # 기획 밀도 (미달 0)
+python -I scripts/design_tokens.py check <프로젝트 폴더>              # 토큰 반영 · 대비 (토큰이 있을 때)
 python -m http.server 8768 --bind 127.0.0.1    (프로젝트 폴더의 부모에서, 백그라운드)
 ```
 Chrome 도구로 `http://127.0.0.1:8768/<프로젝트>/flowmap.html`을 연다. 끝나면 서버를 끄고 탭을 닫는다.
