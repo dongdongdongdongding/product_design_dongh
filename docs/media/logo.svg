@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="product_design_dongh">
+  <!-- 로고 C · 겹친 보드: 네이비 타일 위에 뒤로 쌓인 세 장의 디자인 보드, 맨 앞 보드에 마커 점 -->
+  <rect width="512" height="512" rx="117" fill="#0A254D"/>
+  <g transform="translate(73 82) scale(3.05)">
+    <rect x="44" y="18" width="58" height="44" rx="8" fill="none" stroke="#60718B" stroke-width="5"/>
+    <rect x="31" y="35" width="58" height="44" rx="8" fill="#0A254D" stroke="#A9B3C1" stroke-width="5"/>
+    <rect x="18" y="52" width="58" height="44" rx="8" fill="#FFFFFF"/>
+    <circle cx="31" cy="65" r="6" fill="#007AFF"/>
+    <path d="M43 65H64M30 82H64" fill="none" stroke="#0A254D" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>
