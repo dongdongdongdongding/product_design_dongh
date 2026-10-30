@@ -4,6 +4,8 @@
 
 # screen-spec-kit
 
+<sub>플러그인 이름 <code>product_design_dongh</code> · 명령 <code>/product_design_dongh:start</code></sub>
+
 **기획서 한 벌, 아이디어 한 줄이 화면설계서 · 플로우 맵 · 편집 가능한 디자인 캔버스 · 검수표가 되는 Claude Code 플러그인**
 
 요청서 · 기획서 · 운영 사이트 · 아이디어를 읽고 메뉴 · 기능 · 컴포넌트 · 동작 · 연결까지 직접 분해한 뒤<br>
@@ -45,7 +47,7 @@ screen-spec-kit은 **원본은 Markdown 문서 3종 + 화면 시안 한 파일**
 
 ## 쓰는 흐름 — 단계를 강제하지 않는 하나의 세션
 
-플러그인을 설치하고 `/screen-spec-kit:start`(또는 그냥 "시작")라고 하고 가진 것을 주면 됩니다. 아래는 순서가 아니라 **메뉴**입니다 — 원하는 것부터, 원하는 것만("SB만 다시", "시안만 다시", "분해만").
+플러그인을 설치하고 `/product_design_dongh:start`(또는 그냥 "시작")라고 하고 가진 것을 주면 됩니다. 아래는 순서가 아니라 **메뉴**입니다 — 원하는 것부터, 원하는 것만("SB만 다시", "시안만 다시", "분해만").
 
 | 작업 | 키트가 하는 일 | 내가 하는 일 |
 |---|---|---|
@@ -57,7 +59,7 @@ screen-spec-kit은 **원본은 Markdown 문서 3종 + 화면 시안 한 파일**
 | SB · 디자인 시스템 | 화면설계서 탭, 토큰 · 컴포넌트 보드 | — |
 | 검수 · 전달 | 문서 정합 · 밀도 · 자동 검수 0건 → 링크 · 파일 | 게시 여부 |
 
-멈추는 곳은 사용자가 정해야 하는 세 가지뿐입니다: 분해의 확인 필요, 시안 고르기, 범위 · 공수 증가. **"알아서 끝까지"**라고 하면 이것도 기본안으로 진행하고 마지막에 한 번에 묻습니다. 응답마다 현황 한 줄과 다음 추천이 붙고, 기록은 `spec-kit/progress.md`에 남습니다(`/screen-spec-kit:status`).
+멈추는 곳은 사용자가 정해야 하는 세 가지뿐입니다: 분해의 확인 필요, 시안 고르기, 범위 · 공수 증가. **"알아서 끝까지"**라고 하면 이것도 기본안으로 진행하고 마지막에 한 번에 묻습니다. 응답마다 현황 한 줄과 다음 추천이 붙고, 기록은 `spec-kit/progress.md`에 남습니다(`/product_design_dongh:status`).
 
 ```text
 나: 시작. 동네 체육관 예약 앱 — 시민이 예약하고 관리자가 승인하는 거.
@@ -110,9 +112,12 @@ artifact-qa (check_density · design_tokens check · audits/*.js · harness.html
 ### Claude Code
 
 ```bash
-# Claude Code 안에서
+# Claude Code 안에서 (2.1.275 이상)
+/plugin install product_design_dongh --marketplace donghk-cloud/screen-spec-kit
+
+# 이전 버전
 /plugin marketplace add donghk-cloud/screen-spec-kit
-/plugin install screen-spec-kit@screen-spec-kit
+/plugin install product_design_dongh@product_design_dongh
 ```
 
 필요: Python 3.10+, Node 18+. 자동 검수에는 [Claude in Chrome](https://claude.com/chrome), 게시에는 Artifact 도구가 필요합니다.
@@ -132,10 +137,10 @@ Codex를 다시 시작한 뒤 `$screen-spec-kit` 또는 "기획서로 화면설�
 ## 빠른 시작
 
 ```text
-/screen-spec-kit:new     <작업 폴더> <요청서.hwp> <기획서.pptx> https://<배포 사이트>
-/screen-spec-kit:build   <작업 폴더>/spec-kit --design
-/screen-spec-kit:audit   <작업 폴더>/spec-kit
-/screen-spec-kit:publish <작업 폴더>/spec-kit
+/product_design_dongh:new     <작업 폴더> <요청서.hwp> <기획서.pptx> https://<배포 사이트>
+/product_design_dongh:build   <작업 폴더>/spec-kit --design
+/product_design_dongh:audit   <작업 폴더>/spec-kit
+/product_design_dongh:publish <작업 폴더>/spec-kit
 ```
 
 또는 그냥 이렇게 말하면 `screen-spec-kit` 스킬이 순서를 잡습니다.
